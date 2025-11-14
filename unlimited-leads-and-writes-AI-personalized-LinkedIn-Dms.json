@@ -1,0 +1,702 @@
+{
+  "name": "unlimited leads and writes AI-personalized LinkedIn Dms",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1720,
+        0
+      ],
+      "id": "0483582b-d59f-492d-80a2-e2ce56167dcc",
+      "name": "When chat message received",
+      "webhookId": "0e5459c1-b1c7-492c-842f-522f41602ead"
+    },
+    {
+      "parameters": {
+        "content": "Enter your target prospect (ICP)\n\nExample : CEO in tech , company size is 1-25\n\n",
+        "height": 620,
+        "width": 340
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1860,
+        -220
+      ],
+      "id": "c967624e-91f5-432d-85ce-82113f57f36b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Add the prospects to your google , CRM, outbound tool ",
+        "height": 1040,
+        "width": 340,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -620
+      ],
+      "id": "81cb6178-8fbb-41fb-9e97-ce077bece7d3",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "Enrich leads with Verifier Emails :\n\nWe use Linfinder AI.\n\nAdd you Linkfinder AI API KEY to this node, you can get it here after you create an account : https://linkfinderai.com/",
+        "height": 600,
+        "width": 360
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -700
+      ],
+      "id": "0bb5d8b7-975d-41c9-b2f5-56cb6224cbad",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.linkedin }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 25,
+              "batchInterval": 25000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        -460
+      ],
+      "id": "edb05830-7d05-4b84-8baf-097e3b96d318",
+      "name": "Linkedin profile scraper"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1SzMWdsjWTQ_w2WILfUMWyRiG42E-LC6rUcoebt7S4Vc/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SzMWdsjWTQ_w2WILfUMWyRiG42E-LC6rUcoebt7S4Vc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $('If').item.json.name }}",
+            "job": "={{ $('If').item.json.title }}",
+            "location": "={{ $('If').item.json.city }},{{ $('If').item.json.country }}",
+            "company": "={{ $('If').item.json.company }}",
+            "linkedin url": "={{ $('If').item.json.linkedin }}",
+            "ai opener": "={{ $json.output }}",
+            "emails": "={{ $('If').item.json.email }}",
+            "website": "={{ $('If').item.json.website }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job",
+              "displayName": "job",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin url",
+              "displayName": "linkedin url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai opener",
+              "displayName": "ai opener",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "emails",
+              "displayName": "emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "ignoreTypeMismatchErrors": false,
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1240,
+        0
+      ],
+      "id": "8e347241-1c74-44ea-87b8-607152ac8166",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "g9VmfGQduouZIgCI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=<role>\nYou are an expert API query translator specializing in converting natural language search queries into structured JSON API requests for a leads database system.\n</role>\n\n<context>\nUsers will provide casual, conversational queries like \"CEO tech in Paris\" or \"500 marketing managers in SF with email\". Your job is to parse these queries and generate properly formatted JSON request bodies for the Unlimited Leads Export API.\n\nThe API endpoint is: POST https://api-unlimited-leads-export.hamoureliasse.workers.dev/\n\nMaximum records per request: 5,000 (per dafault 250 is the value to add)\n</context>\n\n<api_schema>\n{\n  \"limit\": number (1-250),\n  \"searchParams\": {\n    \"country\": string (REQUIRED),\n    \"industry\": string (OPTIONAL),\n    \"city\": string (OPTIONAL),\n    \"jobtitle\": string (OPTIONAL),\n    \"companysize\": string (OPTIONAL),\n    \"hasemail\": string (OPTIONAL - \"yes\" or \"no\"),\n    \"company\": string (OPTIONAL),\n    \"keywords\": string (OPTIONAL)\n  }\n}\n</api_schema>\n\n<allowed_values>\n<countries>\nONLY these countries are valid (use exact spelling):\n- United States\n- France\n- Spain\n- Italy\n- Germany\n- Netherlands\n- Canada\n- Australia\n- India\n- United Kingdom\n</countries>\n\n<industries>\nONLY these exact values are allowed:\nAccounting, Agriculture, Airlines/aviation, Animation, Apparel & fashion, Architecture & planning, Arts & crafts, Automotive, Aviation & aerospace, Banking, Biotechnology, Broadcast media, Building materials, Business supplies & equipment, Capital markets, Chemicals, Civic & social organization, Civil engineering, Computer & network security, Computer networking, Computer software, Construction, Consumer electronics, Consumer goods, Consumer services, Defense & space, Design, Education, Electrical/electronic manufacturing, Environmental services & clean energy, Events services, Facilities & services, Finance, Food & beverages, Food production, Furniture, Government administration, Health, Wellness & fitness, Hospital & health care, Hospitality, Information technology & services, Insurance, Internet, Legal services, Leisure, Travel & tourism, Logistics & supply chain, Luxury goods & jewelry, Machinery, Management consulting, Manufacturing, Maritime, Marketing & advertising, Media production, Paper & forest products, Printing, Political organization, Public safety, Real estate, Restaurants, Retail, Sporting goods, Staffing & recruiting, Telecommunications, Transportation, Utilities, Venture capital & private equity, Warehousing, Wholesale, Wine & spirits, Writing & editing\n</industries>\n\n<company_sizes>\nONLY these exact values are allowed:\n- \"1-25\"\n- \"26-50\"\n- \"51-250\"\n- \"251-1000\"\n- \"1000+\"\n</company_sizes>\n</allowed_values>\n\n<extraction_instructions>\nParse the user query and extract the following information:\n\n1. **limit** (number of results)\n   - Default: 100\n   - If user specifies amount (\"500 leads\", \"2000 contacts\"), use that number\n   - Maximum: 5000\n\n2. **country** (REQUIRED - never leave empty)\n   - Map variations to exact values:\n     * \"US\", \"USA\", \"America\" → \"United States\"\n     * \"UK\", \"Britain\", \"England\" → \"United Kingdom\"\n   - Infer from city if not explicit:\n     * \"Paris\" → \"France\"\n     * \"London\" → \"United Kingdom\"\n     * \"Berlin\" → \"Germany\"\n     * \"San Francisco\", \"New York\", \"LA\" → \"United States\"\n   - Default to \"United States\" if no country detected\n\n3. **jobtitle**\n   - Extract: CEO, CTO, CFO, Director, Manager, VP, Head of, Engineer, Developer, Founder, etc.\n   - Normalize to singular: \"marketing managers\" → \"marketing manager\"\n\n4. **industry**\n   - Map keywords to exact allowed values:\n     * \"tech\", \"technology\", \"IT\", \"software\" → \"Information technology & services\"\n     * \"finance\", \"banking\" → \"Banking\" or \"Finance\"\n     * \"healthcare\", \"medical\" → \"Hospital & health care\"\n     * \"marketing\", \"advertising\" → \"Marketing & advertising\"\n     * \"consulting\" → \"Management consulting\"\n     * \"real estate\", \"property\" → \"Real estate\"\n     * \"AI\", \"SaaS\" → \"Computer software\"\n   - MUST use exact value from allowed list\n\n5. **city**\n   - Extract city names directly: Paris, London, Berlin, San Francisco, etc.\n\n6. **companysize**\n   - Map keywords:\n     * \"startup\", \"small\" → \"1-25\"\n     * \"medium\", \"mid-size\" → \"51-250\"\n     * \"large\", \"enterprise\" → \"1000+\"\n\n7. **hasemail**\n   - If query mentions \"with email\", \"has email\", \"verified email\" → \"yes\"\n   - Only use \"yes\" or \"no\"\n\n8. **company**\n   - Extract specific company names if mentioned (\"at Google\", \"working at Apple\")\n\n9. **keywords**\n   - Any additional descriptive terms not fitting other categories\n</extraction_instructions>\n\n<output_format>\nCRITICAL: Return ONLY a single-line compact JSON string with NO newlines, NO line breaks, NO indentation, and NO extra whitespace.\n\nThe JSON must be minified on a single line.\n\nALL searchParams fields must be present, even if empty (use empty string \"\").\n\nCorrect format (single line):\n{\"action\":\"export\",\"limit\":100,\"searchParams\":{\"country\":\"France\",\"industry\":\"Information technology & services\",\"city\":\"Paris\",\"jobtitle\":\"CEO\",\"company\":\"\",\"keywords\":\"\",\"companysize\":\"\",\"hasemail\":\"\"}}\n\nWRONG format (multi-line with \\n):\n{\n  \"action\": \"export\",\n  \"limit\": 100,\n  ...\n}\n</output_format>\n\n<examples>\n<example>\n<input>CEO tech in paris</input>\n<output>{\"action\":\"export\",\"limit\":100,\"searchParams\":{\"country\":\"France\",\"industry\":\"Information technology & services\",\"city\":\"Paris\",\"jobtitle\":\"CEO\",\"company\":\"\",\"keywords\":\"\",\"companysize\":\"\",\"hasemail\":\"\"}}</output>\n</example>\n\n<example>\n<input>500 marketing managers in San Francisco with email</input>\n<output>{\"action\":\"export\",\"limit\":500,\"searchParams\":{\"country\":\"United States\",\"city\":\"San Francisco\",\"jobtitle\":\"marketing manager\",\"hasemail\":\"yes\",\"industry\":\"Marketing & advertising\",\"company\":\"\",\"keywords\":\"\",\"companysize\":\"\"}}</output>\n</example>\n\n<example>\n<input>founders at startups in berlin</input>\n<output>{\"action\":\"export\",\"limit\":100,\"searchParams\":{\"country\":\"Germany\",\"city\":\"Berlin\",\"jobtitle\":\"founder\",\"companysize\":\"1-25\",\"industry\":\"\",\"company\":\"\",\"keywords\":\"\",\"hasemail\":\"\"}}</output>\n</example>\n\n<example>\n<input>CFO finance London</input>\n<output>{\"action\":\"export\",\"limit\":100,\"searchParams\":{\"country\":\"United Kingdom\",\"city\":\"London\",\"industry\":\"Finance\",\"jobtitle\":\"CFO\",\"company\":\"\",\"keywords\":\"\",\"companysize\":\"\",\"hasemail\":\"\"}}</output>\n</example>\n</examples>\n\n<error_handling>\nIf the query cannot be parsed or contains an invalid country, return:\n{\"error\":\"Unable to parse query. Please specify a valid country from: United States, France, Spain, Italy, Germany, Netherlands, Canada, Australia, India, United Kingdom\"}\n</error_handling>\n\n<critical_rules>\n1. ALWAYS output compact single-line JSON with NO newlines or extra spaces\n2. ALWAYS include the \"country\" field with a valid value\n3. ALWAYS include ALL searchParams fields (use empty string \"\" if not applicable)\n4. ONLY use exact industry values from the allowed list\n5. Output ONLY valid JSON - no markdown, no explanations, no formatting\n6. Never exceed limit of 5000\n7. Map country variations correctly (US→United States, UK→United Kingdom)\n</critical_rules>\n\n<task>\nParse the user's natural language query and generate a valid single-line compact JSON API request body ready to POST to the Unlimited Leads Export API.\n</task>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -1360,
+        0
+      ],
+      "id": "187b5633-3a26-4200-a93d-600ff1129af3",
+      "name": "Query builder"
+    },
+    {
+      "parameters": {
+        "content": "Unlimited leads database export:\n\nFind leads from https://unlimited-leads.online/ database with your search query",
+        "height": 600,
+        "width": 360,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -220
+      ],
+      "id": "7ec48eb5-ca29-4215-8cc0-669a2439af55",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api-unlimited-leads-export.hamoureliasse.workers.dev/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -820,
+        0
+      ],
+      "id": "3b391c6e-70ab-4707-9022-e7a64fba739f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=name :{{ $json.name }}\ntitle: {{ $json.title }}\ncity : {{ $json.city }}\ncompany :{{ $json.company }}\nindustry :{{ $json.industry }}\nwebsite : {{ $json.website }}\ncompany size : {{ $json.companysize }}",
+        "options": {
+          "systemMessage": "<task>\nYou are an expert at writing personalized LinkedIn DM openers for B2B networking. Your goal is to create a brief, natural, and relevant opening message that starts a genuine conversation without pitching any offer or service.\n</task>\n\n<instructions>\n1. Write ONE short, conversational opening message (10-20 words maximum)\n2. Reference at least ONE specific element from the prospect data (company, role, industry, recent activity, or location)\n3. Use a casual, authentic tone suitable for LinkedIn\n4. Avoid sales language, pitches, or \"I'm reaching out because...\" phrases\n5. Make it feel like a genuine connection attempt, not an outreach template\n6. Focus on starting a conversation or showing authentic interest\n7. Output ONLY the opening message, nothing else\n</instructions>\n\n<examples>\nExample 1 (for a VP of Sales): \"Saw you're leading sales at [Company] - curious how you're navigating the [Industry] landscape right now.\"\n\nExample 2 (for a Marketing Director): \"Love what [Company] is doing in [Industry]. How's the marketing role treating you there?\"\n\nExample 3 (activity-based): \"Your recent post about [topic] really resonated - dealing with similar challenges in [Industry]?\"\n\nExample 4 (location-based): \"Fellow [Location] founder here. How's the [Industry] scene treating you lately?\"\n</examples>\n\n<output_format>\nOutput only the personalized LinkedIn DM opener with no additional text, explanations, or formatting.\n</output_format>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        600,
+        0
+      ],
+      "id": "275a12d5-5171-485b-a1e7-8521081a6046",
+      "name": "Personnalized Linkedin DM"
+    },
+    {
+      "parameters": {
+        "model": "=google/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        -1380,
+        340
+      ],
+      "id": "4b45e92a-fab6-421c-aba7-222a136830a4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nUVy4a5bkNWpvrUp",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "=google/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        540,
+        160
+      ],
+      "id": "b15fe161-7b76-4d86-a79c-c1c6ff6b804d",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "nUVy4a5bkNWpvrUp",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c7b968a5-5e8f-496a-8dd6-32aff8c13f06",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -500,
+        0
+      ],
+      "id": "95444fcb-6a71-4957-a9cd-061b9c404e1e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=name :{{ $json.name }}\ntitle: {{ $json.jobTitle }}\ncompany :{{ $json.company }}\nindustry :{{ $json.industry }}\nwebsite : {{ $json.website }}\neducation : {{ $json.education }}\nheadline : {{ $json.headline }}",
+        "options": {
+          "systemMessage": "<task>\nYou are an expert at writing personalized LinkedIn DM openers for B2B networking. Your goal is to create a brief, natural, and relevant opening message that starts a genuine conversation without pitching any offer or service.\n</task>\n\n<instructions>\n1. Write ONE short, conversational opening message (10-20 words maximum)\n2. Reference at least ONE specific element from the prospect data (company, role, industry, recent activity, or location)\n3. Use a casual, authentic tone suitable for LinkedIn\n4. Avoid sales language, pitches, or \"I'm reaching out because...\" phrases\n5. Make it feel like a genuine connection attempt, not an outreach template\n6. Focus on starting a conversation or showing authentic interest\n7. Output ONLY the opening message, nothing else\n</instructions>\n\n<examples>\nExample 1 (for a VP of Sales): \"Saw you're leading sales at [Company] - curious how you're navigating the [Industry] landscape right now.\"\n\nExample 2 (for a Marketing Director): \"Love what [Company] is doing in [Industry]. How's the marketing role treating you there?\"\n\nExample 3 (activity-based): \"Your recent post about [topic] really resonated - dealing with similar challenges in [Industry]?\"\n\nExample 4 (location-based): \"Fellow [Location] founder here. How's the [Industry] scene treating you lately?\"\n</examples>\n\n<output_format>\nOutput only the personalized LinkedIn DM opener with no additional text, explanations, or formatting.\n</output_format>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        600,
+        -460
+      ],
+      "id": "cd0136f1-8c2b-43c6-947a-6fa89a479aa4",
+      "name": "Personnalized Linkedin DM1"
+    },
+    {
+      "parameters": {
+        "model": "=google/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        -280
+      ],
+      "id": "20520af2-5578-4203-b69d-61ef65b688b6",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "nUVy4a5bkNWpvrUp",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "AI agents to create personalized Linkedin DMS\n\nEDIT the prompt to your own service/product/offer for better reesults",
+        "height": 1100,
+        "width": 500,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -640
+      ],
+      "id": "f91db75a-9023-45bf-aed2-40e330c1007b",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1SzMWdsjWTQ_w2WILfUMWyRiG42E-LC6rUcoebt7S4Vc/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SzMWdsjWTQ_w2WILfUMWyRiG42E-LC6rUcoebt7S4Vc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $('Linkedin profile scraper').item.json.name }}",
+            "job": "={{ $('Linkedin profile scraper').item.json.jobTitle }}",
+            "location": "={{ $('Linkedin profile scraper').item.json.location }}",
+            "company": "={{ $('Linkedin profile scraper').item.json.company }}",
+            "linkedin url": "={{ $('Linkedin profile scraper').item.json.linkedinUrl }}",
+            "ai opener": "={{ $json.output }}",
+            "website": "={{ $('Linkedin profile scraper').item.json.website }}",
+            "emails": "={{ $('Linkedin profile scraper').item.json.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job",
+              "displayName": "job",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin url",
+              "displayName": "linkedin url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai opener",
+              "displayName": "ai opener",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "emails",
+              "displayName": "emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "ignoreTypeMismatchErrors": false,
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1240,
+        -460
+      ],
+      "id": "ebc22153-393c-458b-bdb1-4cdcff922ef2",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "g9VmfGQduouZIgCI",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Query builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linkedin profile scraper": {
+      "main": [
+        [
+          {
+            "node": "Personnalized Linkedin DM1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets1": {
+      "main": [
+        []
+      ]
+    },
+    "Query builder": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Personnalized Linkedin DM": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Query builder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Personnalized Linkedin DM",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Linkedin profile scraper",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Personnalized Linkedin DM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Personnalized Linkedin DM1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Personnalized Linkedin DM1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0db80ac6-1c55-4b0e-a103-5aa8146e5569",
+  "meta": {
+    "instanceId": "f60330b05f7488b5b1d05388dafae39e4870f8337f359bf70a3b4c76201c7e88"
+  },
+  "id": "ApNr8zr6uKNkuJGv",
+  "tags": []
+}
