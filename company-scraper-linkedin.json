@@ -1,0 +1,945 @@
+{
+  "name": "company finder + enrichment",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1840,
+        700
+      ],
+      "id": "fe0640cb-d772-4a53-8695-fc095e88944d",
+      "name": "When chat message received",
+      "webhookId": "0e5459c1-b1c7-492c-842f-522f41602ead"
+    },
+    {
+      "parameters": {
+        "content": "Enter your target companies (ICP)\n\nExample : Construction companies in New York\n\n",
+        "height": 440,
+        "width": 280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1920,
+        540
+      ],
+      "id": "0bff6018-e99e-41e6-ab7a-059041296d5c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Company Finder + enrichment (email, phone , website...)",
+        "height": 120,
+        "width": 360,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1920,
+        300
+      ],
+      "id": "8e7a8330-15af-4c2d-8071-b9af8720d50c",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c7b968a5-5e8f-496a-8dd6-32aff8c13f06",
+              "leftValue": "={{ $json.jobTitle }}",
+              "rightValue": "President",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "9660e9d7-610f-418d-b41b-63124393ea85",
+              "leftValue": "={{ $json.jobTitle }}",
+              "rightValue": "CEO",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "6193b685-3e40-4be5-8bbb-38f0f8b7625a",
+              "leftValue": "={{ $json.jobTitle }}",
+              "rightValue": "Chief",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1860,
+        640
+      ],
+      "id": "92c1176f-bdbf-4887-9c48-31cca53472b8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1080,
+        700
+      ],
+      "id": "088442f8-aff8-4b24-869d-0d18d7b8f2a0",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "content": "Enrich Companies data with company email, phone, website .... :\n\nWe use Linfinder AI.\n\nAdd you Linkfinder AI API KEY to this node, you can get it here after you create an account : https://linkfinderai.com/\n\nADD YOUR Linkfinder AI API KEY LIKE THIS : 'Bearer api_key' ",
+        "height": 540,
+        "width": 780,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        500
+      ],
+      "id": "34b7e800-fb50-46e6-aa37-bada78f19959",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -560,
+        720
+      ],
+      "id": "6130002a-a36e-43f3-b47a-a6f42b44b6fb",
+      "name": "find company email"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_phone"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $('Linkedin company data scraping').item.json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        720
+      ],
+      "id": "3223c00d-617c-4792-954f-a3b04f476187",
+      "name": "find company phone"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_company_to_employees"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json[\"Compay Linkedin url \"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1500,
+        640
+      ],
+      "id": "2a4f67aa-a92b-4e52-8a4c-da17a1057ea2",
+      "name": "Find company decision makers"
+    },
+    {
+      "parameters": {
+        "content": "Find companies decision makers ",
+        "height": 80,
+        "width": 280,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        600,
+        420
+      ],
+      "id": "713ad7c1-88cd-4c5a-afb2-fc79fe125b9b",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1i1MbwUeM5wvazngb5xR-fXQaM5_05fUBv894xmJY0HY/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i1MbwUeM5wvazngb5xR-fXQaM5_05fUBv894xmJY0HY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company name": "={{ $('Linkedin company data scraping').item.json.name }}",
+            "Company phone": "={{ $json.result }}",
+            "Company email": "={{ $('find company email').item.json.result }}",
+            "Company website": "={{ $('Linkedin company data scraping').item.json.website }}",
+            "Compay Linkedin url ": "={{ $('Linkedin company data scraping').item.json.linkedinUrl }}",
+            "Company size": "={{ $('Linkedin company data scraping').item.json.size }}",
+            "Company industry": "={{ $('Linkedin company data scraping').item.json.industry }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company name",
+              "displayName": "Company name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company phone",
+              "displayName": "Company phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company email",
+              "displayName": "Company email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company website",
+              "displayName": "Company website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Compay Linkedin url ",
+              "displayName": "Compay Linkedin url ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company size",
+              "displayName": "Company size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company industry",
+              "displayName": "Company industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision maker name",
+              "displayName": "Decision maker name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision maker url",
+              "displayName": "Decision maker url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision maker job title",
+              "displayName": "Decision maker job title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision maker email",
+              "displayName": "Decision maker email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "ignoreTypeMismatchErrors": false,
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        0,
+        720
+      ],
+      "id": "b1491921-c0d5-4779-86a9-5df5abf60904",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "g9VmfGQduouZIgCI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1i1MbwUeM5wvazngb5xR-fXQaM5_05fUBv894xmJY0HY/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i1MbwUeM5wvazngb5xR-fXQaM5_05fUBv894xmJY0HY/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        600,
+        640
+      ],
+      "id": "0ed46b60-fd50-4a2f-b0cf-b969b7705628",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "Wn9qdxvNYz7WTEao",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "GOOGLE SEARCH : \n\nWe find companies with a google search \n\nUsing this apify actor : \n\nADD the call URL : the one to choose is the third one RUN ACTOR AND GET DATASET\n\n",
+        "height": 520,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1580,
+        480
+      ],
+      "id": "153b1c36-aa2e-4144-825d-4918279f65ab",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"keyword\": \"{{ $json.chatInput }} site:linkedin.com/company\",\n  \"limit\": \"10\",\n    \"page\": 1,\n    \"start\": 1\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1420,
+        700
+      ],
+      "id": "b0b362da-fd95-4749-9adb-cd08c7e4d6da",
+      "name": "Google search to find target companies",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_company_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.results[0].url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -800,
+        720
+      ],
+      "id": "3d61832c-d40e-45bb-88ea-9dda5f0eb97c",
+      "name": "Linkedin company data scraping"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        900,
+        640
+      ],
+      "id": "07fdae0e-772d-4ea3-811a-83fb29455e95",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1i1MbwUeM5wvazngb5xR-fXQaM5_05fUBv894xmJY0HY/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i1MbwUeM5wvazngb5xR-fXQaM5_05fUBv894xmJY0HY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company name": "={{ $('Find company decision makers').item.json.company }}",
+            "Decision maker name": "={{ $('Find company decision makers').item.json.name }}",
+            "Decision maker job title": "={{ $('Find company decision makers').item.json.jobTitle }}",
+            "Decision maker url": "={{ $('Find company decision makers').item.json.linkedinUrl }}"
+          },
+          "matchingColumns": [
+            "Company name"
+          ],
+          "schema": [
+            {
+              "id": "Company name",
+              "displayName": "Company name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company phone",
+              "displayName": "Company phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company email",
+              "displayName": "Company email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company website",
+              "displayName": "Company website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Compay Linkedin url ",
+              "displayName": "Compay Linkedin url ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company size",
+              "displayName": "Company size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company industry",
+              "displayName": "Company industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Decision maker name",
+              "displayName": "Decision maker name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision maker url",
+              "displayName": "Decision maker url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision maker job title",
+              "displayName": "Decision maker job title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision maker email",
+              "displayName": "Decision maker email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "ignoreTypeMismatchErrors": false,
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2440,
+        640
+      ],
+      "id": "ab3a3989-4d65-4e3b-9d27-54a977fbccdb",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "g9VmfGQduouZIgCI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c16e659e-0b6e-40f5-baba-69827b4ea726",
+              "leftValue": "={{ $json['Company name'] }}",
+              "rightValue": "Company name",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1180,
+        640
+      ],
+      "id": "644a7d87-5ebc-458d-91f0-286e111de833",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "content": "FIND company employee \n\nADD your Linkfincer ai api key : https://linkfinderai.com/",
+        "height": 540,
+        "width": 340,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        480
+      ],
+      "id": "69709300-c9eb-487b-bb0b-8c2e85fc8802",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "FIlter employee JOB title and only keep the decision makers",
+        "height": 540,
+        "width": 340,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        480
+      ],
+      "id": "d08529cf-c031-4fd7-8d30-ce3cf36dd970",
+      "name": "Sticky Note9"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Google search to find target companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Linkedin company data scraping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find company email": {
+      "main": [
+        [
+          {
+            "node": "find company phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find company phone": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find company decision makers": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google search to find target companies": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Linkedin company data scraping": {
+      "main": [
+        [
+          {
+            "node": "find company email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Find company decision makers",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ec2a2185-a19a-41a5-9fab-61b0a97321f4",
+  "meta": {
+    "instanceId": "f60330b05f7488b5b1d05388dafae39e4870f8337f359bf70a3b4c76201c7e88"
+  },
+  "id": "EQ0gBo1MWHBipp9X",
+  "tags": []
+}
