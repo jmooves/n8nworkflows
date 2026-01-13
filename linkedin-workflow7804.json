@@ -1,0 +1,871 @@
+{
+  "name": "Lead research and qualifying AI agent",
+  "nodes": [
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Message a model in Perplexity",
+        "messages": {
+          "message": [
+            {
+              "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message0_Text', ``, 'string') }}",
+              "role": "system"
+            },
+            {
+              "content": "=Company Domain: {{ $json['Company Domain'] }}"
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "id": "91a5792a-efdc-42c5-8ed6-50fed9a135fe",
+      "name": "Perplexity Research Tool",
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 1,
+      "position": [
+        832,
+        496
+      ],
+      "credentials": {
+        "perplexityApi": {
+          "id": "GwHhFezSHSoRgFwr",
+          "name": "Michele Connection | 19th August"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Research Lead on LinkedIn Perplexity",
+        "messages": {
+          "message": [
+            {
+              "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message0_Text', ``, 'string') }}",
+              "role": "system"
+            },
+            {
+              "content": "=LinkedIN URL: {{ $json['LinkedIn Profile URL'] }}"
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "id": "936a8060-a55f-406f-84e3-a30f68a46617",
+      "name": "Perplexity for LinkedIn Research",
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        496
+      ],
+      "credentials": {
+        "perplexityApi": {
+          "id": "GwHhFezSHSoRgFwr",
+          "name": "Michele Connection | 19th August"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1CrLwmb92d8GU77yFLd1vZu08XE8W47zqrS5rkdgfmAs",
+          "mode": "list",
+          "cachedResultName": "Lead Research Analyst",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CrLwmb92d8GU77yFLd1vZu08XE8W47zqrS5rkdgfmAs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10FERi5U37GRpUS3soH9zQ4Az-sLPY6ssFB1LM1E7t_8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Research Agent').item.json.output.email }}",
+            "Company Name": "={{ $('Research Agent').item.json.output.companyName }}",
+            "Potential Company Solutions": "={{ $('Research Agent').item.json.output.potentialCompanySolutions }}",
+            "Score": "={{ $json.output.score }}",
+            "Date": "={{ $('Research Agent').item.json.output.date }}",
+            "Decision Maker?": "={{ $('Research Agent').item.json.output.decisionMaker }}",
+            "Name": "={{ $('Research Agent').item.json.output.leadName }}",
+            "Revenue": "={{ $('Research Agent').item.json.output.monthlyRevenue }}",
+            "Interest Summary": "={{ $('Research Agent').item.json.output.aiInterestSummary }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision Maker?",
+              "displayName": "Decision Maker?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Revenue",
+              "displayName": "Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interest Summary",
+              "displayName": "Interest Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Potential Company Solutions",
+              "displayName": "Potential Company Solutions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1808,
+        288
+      ],
+      "id": "c3214f55-4749-4ce4-b696-232af88c0ec3",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "m7xiSuoqHvxyxHZq",
+          "name": "micheletorti5 | Connection 5th Sept"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        480
+      ],
+      "id": "b08cbe64-ead3-457c-937b-1a1ffd5d5f2f",
+      "name": "Brain1",
+      "credentials": {
+        "openAiApi": {
+          "id": "JW58mv7uuR54fXsx",
+          "name": "YT Aug 19th"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1344,
+        496
+      ],
+      "id": "1fe4edc1-0450-446d-96cf-6b8c4f7c5d5e",
+      "name": "Brain2",
+      "credentials": {
+        "openAiApi": {
+          "id": "JW58mv7uuR54fXsx",
+          "name": "YT Aug 19th"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "hundredmilliondollarpeanuts@gmail.com",
+        "subject": "=HOT LEAD ALERT - Score: {{ $json.Score }} ",
+        "emailType": "text",
+        "message": "=*Company:* {{ $json['Company Name'] }}\n*Lead Name:* {{ $json.Name }}\n*Email:* {{ $json.Email }}\n*Monthly Revenue:* {{ $json.Revenue }}\n*AI Interest:* {{ $json['Interest Summary'] }}\n*Recommended Solutions:* {{ $json['Potential Company Solutions'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2240,
+        192
+      ],
+      "id": "6a13b599-853a-4e58-918d-558c855cb63f",
+      "name": "Hot Lead",
+      "webhookId": "254e49fb-a447-44f0-8270-904eb62efa28",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SxAixly4TEOkIP6d",
+          "name": "Test Jm Solutionss"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "hundredmilliondollarpeanuts@gmail.com",
+        "subject": "=Cold Lead - Score: {{ $json.Score }}",
+        "emailType": "text",
+        "message": "=*Company:* {{ $json['Company Name'] }}\n*Lead Name:* {{ $json.Name }}\n*Email:* {{ $json.Email }}\n*Monthly Revenue:* {{ $json.Revenue }}\n*AI Interest:* {{ $json['Interest Summary'] }}\n*Recommended Solutions:* {{ $json['Potential Company Solutions'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2240,
+        480
+      ],
+      "id": "a98b50e0-a25f-4515-9327-ac1f3bfbd2d4",
+      "name": "Cold Lead",
+      "webhookId": "254e49fb-a447-44f0-8270-904eb62efa28",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SxAixly4TEOkIP6d",
+          "name": "Test Jm Solutionss"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "hundredmilliondollarpeanuts@gmail.com",
+        "subject": "=Warm Lead - Score: {{ $json.Score }}",
+        "emailType": "text",
+        "message": "=*Company:* {{ $json['Company Name'] }}\n*Lead Name:* {{ $json.Name }}\n*Email:* {{ $json.Email }}\n*Monthly Revenue:* {{ $json.Revenue }}\n*AI Interest:* {{ $json['Interest Summary'] }}\n*Recommended Solutions:* {{ $json['Potential Company Solutions'] }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2240,
+        336
+      ],
+      "id": "ea9acee0-df5f-4440-a3d2-758ae3a50e53",
+      "name": "Warm Lead",
+      "webhookId": "254e49fb-a447-44f0-8270-904eb62efa28",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SxAixly4TEOkIP6d",
+          "name": "Test Jm Solutionss"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Lead Intelligence Research Request",
+        "formDescription": "Submit lead information to get comprehensive intelligence and insights",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "placeholder": "Eg. John Smith",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company Domain",
+              "placeholder": "Company website domain (e.g., example.com)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "LinkedIn Profile URL",
+              "placeholder": "LinkedIn profile URL (optional)"
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Start Research"
+        }
+      },
+      "id": "a32ed3e4-445f-46bc-a7dd-c2d85d1b1dc9",
+      "name": "New Lead",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        288
+      ],
+      "webhookId": "b81133d8-b364-4007-8c2c-9255772a4f04"
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"type\": \"linkedin_profile_to_linkedin_info\",\n  \"input_data\": \"{{ $('New Lead').item.json['LinkedIn Profile URL'] }}\"\n}",
+        "options": {}
+      },
+      "id": "lf-linkedin-profile-scraper",
+      "name": "LinkFinder AI - LinkedIn Profile Scraper",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        288
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "linkfinder-api-key",
+          "name": "LinkFinder AI API Key"
+        }
+      },
+      "notes": "Replaces LinkedIn profile scraping - outputs detailed profile data directly (fullName, jobTitle, email, companyName, etc.)"
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"type\": \"company_name_to_website\",\n  \"input_data\": \"{{ $json.companyName }}\"\n}",
+        "options": {}
+      },
+      "id": "lf-company-website",
+      "name": "LinkFinder AI - Company Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        408
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "linkfinder-api-key",
+          "name": "LinkFinder AI API Key"
+        }
+      },
+      "notes": "Gets company website from LinkFinder AI"
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"type\": \"company_name_to_employee_count\",\n  \"input_data\": \"{{ $json.companyName }}\"\n}",
+        "options": {}
+      },
+      "id": "lf-employee-count",
+      "name": "LinkFinder AI - Employee Count",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        528
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "linkfinder-api-key",
+          "name": "LinkFinder AI API Key"
+        }
+      },
+      "notes": "Gets company employee count from LinkFinder AI"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=LinkedIn Profile Data:\n{{ $('LinkFinder AI - LinkedIn Profile Scraper').item.json.fullName }}\n{{ $('LinkFinder AI - LinkedIn Profile Scraper').item.json.jobTitle }}\n{{ $('LinkFinder AI - LinkedIn Profile Scraper').item.json.companyName }}\n{{ $('LinkFinder AI - LinkedIn Profile Scraper').item.json.email }}\n{{ $('LinkFinder AI - LinkedIn Profile Scraper').item.json.headline }}\n{{ $('LinkFinder AI - LinkedIn Profile Scraper').item.json.about }}\n{{ $('LinkFinder AI - LinkedIn Profile Scraper').item.json.companyWebsite }}\n{{ $('LinkFinder AI - LinkedIn Profile Scraper').item.json.companyIndustry }}\n\nCompany Data:\nWebsite: {{ $('LinkFinder AI - Company Website').item.json.result }}\nEmployee Count: {{ $('LinkFinder AI - Employee Count').item.json.result }}\n\nCompany Domain: {{ $('New Lead').item.json['Company Domain'] }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=## Overview\n\nYou are an **expert lead intelligence analyst** specializing in **AI Agency sales and implementation readiness**.  \nYour goal is to turn all provided data about a lead and their company into a **concise, highly actionable intelligence report** that helps an AI Agency close and implement successful projects.\n\n---\n\n### 1. Research Tools & Mandatory Usage\n\n**Always use the Perplexity Research Tool & LinkedIn Perplexity** for external research. Use them specifically to:\n\n- Find **recent job postings** for the company to spot:\n  - Repetitive roles  \n  - Manual, operational, or process-heavy work\n- Research the company's **tech stack & infrastructure**  \n  - Engineering stack (languages, frameworks, cloud providers, data tools)  \n  - Internal tools (CRM, helpdesk, marketing, collaboration, etc.)\n- Find **company reviews** on Glassdoor or similar platforms  \n  - Extract pain points, operational issues, culture signals, and inefficiencies\n- Gather **competitor intelligence** and **AI adoption trends** in their industry\n- Research **industry-specific automation opportunities** and AI transformation trends\n- Identify any additional context on:\n  - Company **digital maturity**  \n  - **Innovation initiatives**  \n  - Public mentions of AI, automation, or data platforms\n\nAlways combine these findings with the **internal data sources** listed below.\n\n---\n\n### 2. Internal Data Sources to Use\n\nSystematically review and synthesize:\n\n1. **AI Interest Research**  \n   - Signals of AI curiosity, experimentation, or previous conversations  \n   - Use these as primary indicators of **AI readiness and engagement potential**\n\n2. **LinkFinder AI Data (Company & Profile)**  \n   - Company website, employee count, industry  \n   - LinkedIn profile data: job title, company, email, headline, about section, etc.\n\n3. **Lead Information**  \n   - Name, company domain, LinkedIn profile URL\n\n4. **Recent News & Company Developments**  \n   - Product launches, funding, leadership changes, layoffs/hiring surges  \n   - Strategic directions that hint at digital or AI transformation\n\n5. **Lead Scoring & AI Interest Findings**  \n   - Use any existing **Lead Score**, **AI Interest Score**, or similar metrics  \n   - Integrate them directly into your **AI Readiness Assessment** and **Executive Summary**\n\n---\n\n### 3. Core Analytic Tasks\n\n#### 3.1 AI Readiness Assessment (Score 1–10)\n\nProvide an **AI Readiness Score (1–10)** and explain why, based on:\n\n- **Current tech stack sophistication**  \n  - From Perplexity research: cloud usage, data stack, modern tools, integrations\n- **Digital maturity indicators**  \n  - Online presence, product experience, automation hints, API ecosystem, etc.\n- **Technology adoption patterns**  \n  - Use of modern SaaS, AI tools, or developer-centric platforms\n- **Infrastructure readiness for AI integration**  \n  - Data availability, APIs, integrations, cloud infrastructure\n- **Team technical capabilities**  \n  - Presence of engineers, data teams, product ops, RevOps, etc.\n- **Existing Lead Scoring & AI Interest findings**  \n  - Explicitly incorporate and reference these in your justification\n\n#### 3.2 Automation & AI Opportunity Discovery\n\nIdentify and prioritize **automation opportunities**, using:\n\n- **Job postings analysis (via Perplexity)**  \n  - Repetitive tasks, high-volume roles, operational bottlenecks\n- **Company reviews (Glassdoor, etc.)**  \n  - Inefficiencies, slow processes, manual work, poor tooling\n- **Industry-standard automation patterns**  \n  - Common workflows automated in similar companies/industries\n- **Time horizon classification**  \n  - **Quick wins (≤ 90 days)**  \n  - **Mid-term (3–9 months)**  \n  - **Long-term transformations (> 9 months)**\n\nFor each opportunity, estimate: **impact**, **complexity**, and **AI Agency relevance**.\n\n#### 3.3 AI Champions Identification\n\nHighlight **potential internal champions** who can drive AI projects:\n\n- Roles like: **CTO, CIO, CDO, Head of Data, Head of Product, Innovation Director, VP Operations, RevOps, Digital Transformation**\n- Tech-savvy leaders or early adopters with:\n  - AI / ML / data keywords in titles or descriptions\n  - History of working with automation, analytics, or digital transformation\n- For each champion, note:\n  - **Name, title, department**\n  - **Influence level** (High / Medium / Low)\n  - **Why they're a good AI champion**\n\n#### 3.4 Pain Point → AI Solution Mapping\n\nIdentify pain points from:\n\n- Company reviews (Perplexity + Glassdoor, etc.)\n- News articles and public statements\n- Job postings and role descriptions\n- Any provided internal notes or AI Interest Research\n\nFor each pain point, **map directly to AI Agency solutions**, e.g.:\n\n- Customer service overload → **AI chatbots / support automation**\n- Manual data entry, reporting, or reconciliation → **Workflow automation / RPA-like flows**\n- Data analysis challenges → **AI analytics, forecasting, anomaly detection**\n- Content bottlenecks → **AI content generation / personalization**\n- Lead qualification & follow-up issues → **AI lead scoring, routing, and outreach automations**\n\nAlso generate **personalized pitch angles**:\n- \"Because you struggle with X, a Y-style AI automation could save Z time/cost per month.\"\n\n#### 3.5 Competitive AI Pressure Analysis\n\nUsing Perplexity, assess **urgency** and **competitive pressure**:\n\n- Competitors' AI adoption and automation stories in the news\n- Industry-level AI transformation trends\n- Signals of market disruption, consolidation, or innovation arms races\n- Risk of the lead **falling behind** in:\n  - Customer experience  \n  - Operational efficiency  \n  - Product differentiation  \n\nProvide a **Competitive AI Pressure Score (1–10)** with reasoning.\n\n#### 3.6 Industry-Specific AI Use Case Matcher\n\nBased on the lead's **industry + company size**:\n\n- Suggest **3–5 concrete, realistic AI/automation use cases** tailored to their vertical\n- Match **implementation scope** to company size:\n  - Enterprise-style rollouts vs **lightweight SMB/scale-up implementations**\n- Clearly flag **Quick-win use cases** that can show **ROI within ~90 days**\n\n---\n\n### 4. Required Report Structure (Markdown Output)\n\nYour final answer must be a **structured Markdown report** using the following sections and bullets.\n\n#### **EXECUTIVE SUMMARY**\n\n- **Lead Score & Priority**  \n- **Company Overview & Health Score (1–10)**  \n- **AI Readiness Score (1–10)**  \n- **Recommended Implementation Timeline**  \n- **Engagement Priority Level**\n\n#### **KEY STAKEHOLDERS**\n\n- **Key Decision Makers**  \n- **Identified AI Champions**  \n- **Recommended Primary Contact**\n\n#### **COMPANY INTELLIGENCE**\n\n- **Recent Company News & Developments**  \n- **Industry Position & Competitive Landscape**  \n- **Technology Stack & Digital Maturity**  \n- **Company Culture & Innovation Indicators**  \n- **AI Interest Signals**\n\n#### **USE CASE RECOMMENDATIONS**\n\n- **Industry-Specific AI Solutions (3–5)**  \n- **Quick Wins (≤ 90-day ROI)**  \n- **Implementation Scope**  \n- **Vertical-Specific Use Cases**\n\n#### **PAIN POINT ANALYSIS**\n\n- **Identified Pain Points**  \n- **Mapped AI Solutions**  \n- **Personalized Pitch Angles**\n\n#### **AI OPPORTUNITY ANALYSIS**\n\n- **Competitive AI Pressure & Urgency (1–10)**  \n- **Prioritized Automation Opportunities**  \n- **Pain Points → Solutions Matrix**  \n- **Estimated ROI & Timeframe**\n\n#### **ENGAGEMENT STRATEGY**\n\n- **Recommended Approach**  \n- **Key Value Propositions to Emphasize**  \n- **Potential Objections & Responses**  \n- **Quick Wins to Lead With**  \n- **Suggested Meeting Agenda**\n\n#### **RISK FACTORS & CONSIDERATIONS**\n\n- **Budget Constraints Indicators**  \n- **Change Resistance Signals**  \n- **Technical Limitations or Data Gaps**  \n- **Competitive Threats or Timing Risks**\n\n---\n\n### 5. Style & Output Guidelines\n\n- Use **clear, structured Markdown** with headings and bullets  \n- Avoid fluff; keep insights actionable  \n- Quantify whenever possible (scores, timelines, impact estimates)  \n- Do **not fabricate data** — state \"Not found\" if needed  \n- Reference **Lead Score** and **AI Readiness findings** throughout the report\n\nUse all available data plus Perplexity research to produce a **single, self-contained intelligence report** optimized for AI Agency sales and implementation readiness.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        848,
+        288
+      ],
+      "id": "310e9831-68e7-4172-a7da-5df3dd60cba9",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "content": "# 1. New Lead\n",
+        "height": 496,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        352,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "477bd020-8a91-4ae6-a43f-8a08a5744479",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# 2. Lead & Company Research Agent\n",
+        "height": 496,
+        "width": 672,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "783e78c3-eb9e-4296-bf6a-296da269f642",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"date\": \"2024-01-15\",\n  \"email\": \"john@example.com\",\n  \"leadName\": \"John Doe\",\n  \"companyName\": \"Example Corp\",\n  \"monthlyRevenue\": \"$75,000\",\n  \"aiInterestSummary\": \"High interest in AI automation, currently exploring chatbot solutions\",\n  \"potentialCompanySolutions\": \"AI chatbot for customer support, workflow automation, lead scoring system\",\n  \"decisionMaker\": true\n}"
+      },
+      "id": "3b611dca-8cac-417e-a77b-9922d464bb17",
+      "name": "Output Structure",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1168,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 3. Lead Scoring Agent\n",
+        "height": 496,
+        "width": 432,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1312,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "10447e2b-4029-41ca-a6f6-6783fe51a6d3",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"score\": 50\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1568,
+        496
+      ],
+      "id": "65cae29f-0345-43af-be50-ec5d688b859c",
+      "name": "Output Structure1"
+    },
+    {
+      "parameters": {
+        "content": "# 4. Notify Team\n",
+        "height": 496,
+        "width": 688,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1760,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "29c1dd25-4877-48b1-9553-b843be41880e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}\n{{ $('New Lead').item.json['Company Domain'] }}\n{{ $json.output.aiInterestSummary }}\n{{ $json.output.potentialCompanySolutions }}\n{{ $json.output.monthlyRevenue }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a lead qualification specialist for an AI Agency. Score this lead based on their fit for our AI implementation services.\n\nScoring Criteria:\n1. Revenue Requirement (0-30 points): Must be generating at least $50k/month. Award full points for $50k+/month, scale down proportionally for lower revenue, 0 points if under $25k/month\n2. Business Maturity (0-25 points): Well-established business with proven track record, stable operations, professional team\n3. AI Interest & Readiness (0-25 points): Based on the AI Interest Research findings - current AI adoption, interest signals, readiness to implement\n4. Company Size & Structure (0-10 points): Team size, organizational complexity, decision-making capability\n5. Industry Fit (0-10 points): Industries where AI implementation has high ROI and clear use cases\n\nProvide:\n- Overall Lead Score (0-100)\n- Only output the single number, no notes or text.\n\nBe data-driven and specific in your scoring."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1392,
+        288
+      ],
+      "id": "c544f563-82a1-45d2-a487-db05b6c28411",
+      "name": "Lead Scoring Agent"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Lead Scoring Agent').item.json.output.score }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "b16d4f0a-f52b-4b1b-85da-d6e1d406ca45"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Hot Lead (70-100)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Lead Scoring Agent').item.json.output.score }}",
+                    "rightValue": 40,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "edd58583-1d0b-470a-ac43-21a802510737"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Warm Lead (40-69)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Lead Scoring Agent').item.json.output.score }}",
+                    "rightValue": 40,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    },
+                    "id": "4a245b3f-cb3d-48cc-abb6-867fd519b048"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cold Lead (0-39)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "830cafdc-a91c-461c-8f5b-e2d6997673df",
+      "name": "Route by Score",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1984,
+        320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Perplexity Research Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity for LinkedIn Research": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Route by Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brain1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brain2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Lead Scoring Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Lead": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - LinkedIn Profile Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - LinkedIn Profile Scraper": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Company Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Company Website": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Employee Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Employee Count": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Lead Scoring Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output Structure": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output Structure1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Lead Scoring Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Scoring Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Score": {
+      "main": [
+        [
+          {
+            "node": "Hot Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Warm Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cold Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "92794674-c622-42b6-ba71-0ddb2b03fd1d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "497b9f82c9e2221fea60e82fa63290386b7aadcded14b21ff31b0075b1df1efd"
+  },
+  "id": "r9D5AhjIgdYn4Ihu",
+  "tags": []
+}
