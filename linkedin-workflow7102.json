@@ -1,0 +1,624 @@
+{
+  "name": "Google Maps Scraping Multiple URL's",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -60
+      ],
+      "id": "9a80e155-67c9-4bf8-9829-7eea88dbd407",
+      "name": "When clicking 'Test workflow'"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.urlList }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "2332ca49-6130-4351-87ca-906804321db7",
+      "name": "HTTP Request (Google Maps Search)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.data\nconst regex = /https?:\\/\\/([^\\/\\s\"]+)/g\nconst websites = input.match(regex);\n\nreturn websites.map(website => ({json:{website}}))"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "4006d873-df95-4e6b-9e3e-1471b9959907",
+      "name": "Code (Extract Websites)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d620b60e-aa5b-487f-88e1-c9c44c5d5c1e",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "schema",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "01740cf8-6d47-410d-8267-e5fb6fc53033",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "google",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "a74f2c50-22ef-4bce-ba5b-3834ccfbbb23",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "ggpht",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "4154aa82-0e4a-489f-a6fa-0c6635edaf64",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "gstatic",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "29191f16-c242-497a-9a30-fa08d370693f",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "facebook",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "f35c1c25-ba52-40d4-8f71-a18781945515",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "wa",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "acaaf7bc-d621-4d02-bfd8-1df2b5c563b7",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "about",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        940,
+        60
+      ],
+      "id": "956620c0-9b55-4108-9b85-8f46ea133a9b",
+      "name": "Filter (Websites)"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        160,
+        380
+      ],
+      "id": "5529a6c4-8a12-4c04-b1f0-57950baf3398",
+      "name": "Loop Over Items (Websites)"
+    },
+    {
+      "parameters": {
+        "url": "api.linkfinderai.com",
+        "method": "POST",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {api_key_here}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "website_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.website }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        480
+      ],
+      "id": "16b37a6d-fe10-419a-af07-3c966efbb3fb",
+      "name": "LinkFinder AI - Extract Email from Website",
+      "onError": "continueRegularOutput",
+      "notes": "Replaced HTTP Request + Code node for email extraction with LinkFinder AI service"
+    },
+    {
+      "parameters": {
+        "amount": 0.5
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        520,
+        480
+      ],
+      "id": "b9f7a5e5-3e96-46cc-809a-71d677391f76",
+      "name": "Wait",
+      "webhookId": "9671c5ed-2152-4a37-8cd0-3fc42b78a856"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        280
+      ],
+      "id": "f06a34ee-c9db-428b-bc9d-b09159b63db0",
+      "name": "Wait (Before Email Process)",
+      "webhookId": "c3ac30be-0689-472d-bc75-7f989f7d6b0f"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "95cb5446-6c6a-4cd3-8620-66341687f611",
+              "leftValue": "={{ $json.result }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        740,
+        280
+      ],
+      "id": "88afc20d-a3d6-4d43-93b5-2f84d9f14c93",
+      "name": "Filter (Has Emails)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "email-assignment-001",
+              "name": "emails",
+              "value": "={{ $json.result }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        280
+      ],
+      "id": "e5481089-5a0b-4ce3-9444-a045e4db2ada",
+      "name": "Format Email Output"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1v8G1LQ_RTtgCGSW2C1R-TON5EmENG7U-zg0aknEO-ZU",
+          "mode": "list",
+          "cachedResultName": "Google Map Scraping",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v8G1LQ_RTtgCGSW2C1R-TON5EmENG7U-zg0aknEO-ZU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D2eVnh1yeguiUptNEvX6Uer1RN-jYPmjF8h92aH_74Y/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Emails": "={{ $json.emails }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Emails",
+              "displayName": "Emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1180,
+        280
+      ],
+      "id": "f556a6c4-b20d-424b-b055-19fd1535e011",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P8GbujCvl57Gl2lU",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        60
+      ],
+      "id": "d0ec7ec8-d8f7-4c28-81cc-34a06ea840f6",
+      "name": "Limit (Websites per search)",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Scraping Emails from Websites\n\n**OPTIMIZED WITH LINKFINDER AI**\n- Replaced HTTP Request + Code email extraction with LinkFinder AI\n- More reliable email extraction\n- No regex needed",
+        "height": 400,
+        "width": 1780,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -440,
+        280
+      ],
+      "id": "243bf8a0-26ae-4256-815a-ba67ffe2f6f8",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Scraping Multiple Google Map URL's",
+        "height": 480,
+        "width": 1780
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -440,
+        -200
+      ],
+      "id": "0b972b2d-af20-4a0c-89e0-04272baaa73d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        0,
+        -20
+      ],
+      "id": "dcf79135-f80b-4d21-97db-4005ca9cc00e",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        40
+      ],
+      "id": "84fa4e41-6802-4945-a050-fdfed682a412",
+      "name": "Wait1",
+      "webhookId": "f8468cd2-c45d-45f1-bd06-5ce9dd5d297e"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        -160
+      ],
+      "id": "44264263-b5be-4fc1-bcc4-36fd441e01f9",
+      "name": "Wait2",
+      "webhookId": "be0bbcc2-9de5-4462-9323-cd2fd54c0bdf"
+    },
+    {
+      "parameters": {
+        "jsCode": "const urlList = [\"https://www.google.com/maps/search/plumbers+in+jersey+city\", \"https://www.google.com/maps/search/plumbers+in+Manhattan/\", \"https://www.google.com/maps/search/plumbers+in+Queens/\"];\n\nreturn urlList.map(url => {\nreturn {\njson: {\nurlList: url\n}\n}\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        -60
+      ],
+      "id": "20964344-1939-4cf9-971f-3300fdf04844",
+      "name": "Define URL List"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Define URL List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request (Google Maps Search)": {
+      "main": [
+        [
+          {
+            "node": "Code (Extract Websites)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code (Extract Websites)": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter (Websites)": {
+      "main": [
+        [
+          {
+            "node": "Limit (Websites per search)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items (Websites)": {
+      "main": [
+        [
+          {
+            "node": "Wait (Before Email Process)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LinkFinder AI - Extract Email from Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Extract Email from Website": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items (Websites)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait (Before Email Process)": {
+      "main": [
+        [
+          {
+            "node": "Filter (Has Emails)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter (Has Emails)": {
+      "main": [
+        [
+          {
+            "node": "Format Email Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email Output": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit (Websites per search)": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items (Websites)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request (Google Maps Search)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Filter (Websites)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define URL List": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f79f4abb-ade9-4bbd-9f36-8cd13d278ca3",
+  "meta": {
+    "instanceId": "7d6a5bcda733904ebcb54fc0e889f6735550f40f670703e17874c0872e05a9cb"
+  },
+  "id": "YRcTCu1THNRqo5gA",
+  "tags": []
+}
