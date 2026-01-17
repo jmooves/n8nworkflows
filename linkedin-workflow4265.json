@@ -1,0 +1,1242 @@
+{
+  "name": "Lead research and qualifying AI agent",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔍 About LinkFinder AI\n\nLinkFinder AI is a powerful tool to enrich leads and companies and scrape LinkedIn without needing a LinkedIn account.\n\n**Get your API key:** https://linkfinderai.com\n\n---\n\n## 📊 What This Workflow Does\n\nThis workflow performs comprehensive lead research and qualification for AI Agency sales. It:\n\n1. Collects lead information (name, company domain, LinkedIn URL)\n2. Enriches company data (website, email, employee count, LinkedIn info)\n3. Scrapes LinkedIn profiles for detailed professional information\n4. Uses AI to analyze company intelligence and automation opportunities\n5. Scores leads based on AI readiness, revenue, and business maturity\n6. Routes qualified leads to appropriate channels (Hot/Warm/Cold)\n7. Records all data in Google Sheets and sends email notifications\n\n**Input Required:**\n- Full Name (lead's name)\n- Company Domain (company website)\n- LinkedIn Profile URL (optional)\n\n**Output Provided:**\n- Company intelligence report\n- AI readiness assessment\n- Lead qualification score (0-100)\n- Automated notifications based on score\n- Complete data in Google Sheets\n\n---\n\n## ⚙️ Setup Instructions\n\n1. **Get LinkFinder AI API Key**\n   - Visit https://linkfinderai.com\n   - Sign up and copy your API key\n\n2. **Configure All LinkFinder AI Nodes**\n   - Find each node named \"LinkFinder AI - [Service]\"\n   - Open the node settings\n   - In Headers section, find Authorization header\n   - Replace `YOUR_API_KEY_HERE` with your actual API key\n\n3. **Configure Google Sheets Node**\n   - Connect your Google Sheets account\n   - Select or create a spreadsheet for lead data\n   - Map output fields to spreadsheet columns\n\n4. **Configure Gmail Nodes**\n   - Connect your Gmail account\n   - Update recipient email addresses\n   - Customize email templates if needed\n\n5. **Configure OpenAI Nodes**\n   - Add your OpenAI API key for AI analysis\n   - Select appropriate GPT model (gpt-4 recommended)\n\n6. **Test the Workflow**\n   - Click \"Test workflow\" or trigger manually\n   - Verify data flows through all nodes\n   - Check that emails and sheet updates work correctly\n\n7. **Activate**\n   - Once tested, activate the workflow\n\n---\n\n## 🔧 Services Used\n\n**LinkFinder AI Services:**\n- company_name_to_website - Finds company website from domain\n- company_name_to_email - Finds company contact email\n- company_name_to_phone - Finds company phone number\n- company_name_to_employee_count - Gets employee count\n- company_name_to_linkedin_url - Finds company LinkedIn URL\n- linkedin_profile_to_linkedin_info - Scrapes LinkedIn profile details\n- linkedin_company_to_linkedin_info - Scrapes company LinkedIn page\n\n**AI Services:**\n- OpenAI GPT-4 for lead intelligence analysis\n- OpenAI GPT-4 for lead scoring\n\n**Native n8n Services:**\n- Form Trigger for lead submission\n- Google Sheets for data storage\n- Gmail for notifications\n- Switch node for lead routing\n\n---\n\n## ⚠️ Important Notes\n\n- All external service dependencies (Perplexity, Clearbit, Hunter.io, etc.) have been removed\n- This workflow uses ONLY LinkFinder AI and native n8n nodes for data enrichment\n- Ensure your LinkFinder AI subscription supports all services used\n- API key must be added to ALL LinkFinder AI nodes\n- OpenAI API key required for AI analysis agents\n- Google Sheets and Gmail credentials required for notifications",
+        "height": 864,
+        "width": 389,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        250,
+        240
+      ],
+      "id": "doc-note-001",
+      "name": "📖 Workflow Documentation"
+    },
+    {
+      "parameters": {
+        "formTitle": "Lead Intelligence Research Request",
+        "formDescription": "Submit lead information to get comprehensive intelligence and insights",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "placeholder": "Eg. John Smith",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company Domain",
+              "placeholder": "Company website domain (e.g., example.com)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "LinkedIn Profile URL",
+              "placeholder": "LinkedIn profile URL (optional)"
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Start Research"
+        }
+      },
+      "id": "a32ed3e4-445f-46bc-a7dd-c2d85d1b1dc9",
+      "name": "New Lead",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        500
+      ],
+      "webhookId": "b81133d8-b364-4007-8c2c-9255772a4f04"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_website"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['Company Domain'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        400
+      ],
+      "id": "lf-website-001",
+      "name": "LinkFinder AI - Company Website"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['Company Domain'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        520
+      ],
+      "id": "lf-email-001",
+      "name": "LinkFinder AI - Company Email"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_employee_count"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['Company Domain'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        640
+      ],
+      "id": "lf-employees-001",
+      "name": "LinkFinder AI - Employee Count"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_linkedin_url"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['Company Domain'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        760
+      ],
+      "id": "lf-company-linkedin-001",
+      "name": "LinkFinder AI - Company LinkedIn URL"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "merge-001",
+              "name": "companyWebsite",
+              "value": "={{ $('LinkFinder AI - Company Website').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-002",
+              "name": "companyEmail",
+              "value": "={{ $('LinkFinder AI - Company Email').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-003",
+              "name": "employeeCount",
+              "value": "={{ $('LinkFinder AI - Employee Count').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-004",
+              "name": "companyLinkedInUrl",
+              "value": "={{ $('LinkFinder AI - Company LinkedIn URL').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-005",
+              "name": "leadName",
+              "value": "={{ $('New Lead').item.json['Full Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-006",
+              "name": "companyDomain",
+              "value": "={{ $('New Lead').item.json['Company Domain'] }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-007",
+              "name": "linkedInProfileUrl",
+              "value": "={{ $('New Lead').item.json['LinkedIn Profile URL'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        500
+      ],
+      "id": "merge-company-data-001",
+      "name": "Merge Company Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "if-linkedin-001",
+              "leftValue": "={{ $json.linkedInProfileUrl }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        500
+      ],
+      "id": "check-linkedin-001",
+      "name": "Has LinkedIn Profile?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.linkedInProfileUrl }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        400
+      ],
+      "id": "lf-profile-001",
+      "name": "LinkFinder AI - LinkedIn Profile Info"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_company_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.companyLinkedInUrl }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        520
+      ],
+      "id": "lf-company-info-001",
+      "name": "LinkFinder AI - Company LinkedIn Info"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "merge-profile-001",
+              "name": "profileFullName",
+              "value": "={{ $('LinkFinder AI - LinkedIn Profile Info').item.json.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-profile-002",
+              "name": "profileJobTitle",
+              "value": "={{ $('LinkFinder AI - LinkedIn Profile Info').item.json.jobTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-profile-003",
+              "name": "profileEmail",
+              "value": "={{ $('LinkFinder AI - LinkedIn Profile Info').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-profile-004",
+              "name": "profileCompanyName",
+              "value": "={{ $('LinkFinder AI - LinkedIn Profile Info').item.json.companyName }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-profile-005",
+              "name": "profileHeadline",
+              "value": "={{ $('LinkFinder AI - LinkedIn Profile Info').item.json.headline }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-profile-006",
+              "name": "profileAbout",
+              "value": "={{ $('LinkFinder AI - LinkedIn Profile Info').item.json.about }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-company-001",
+              "name": "companyLinkedInName",
+              "value": "={{ $('LinkFinder AI - Company LinkedIn Info').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-company-002",
+              "name": "companyIndustry",
+              "value": "={{ $('LinkFinder AI - Company LinkedIn Info').item.json.industry }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-company-003",
+              "name": "companyDescription",
+              "value": "={{ $('LinkFinder AI - Company LinkedIn Info').item.json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "merge-company-004",
+              "name": "companySize",
+              "value": "={{ $('LinkFinder AI - Company LinkedIn Info').item.json.size }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1920,
+        400
+      ],
+      "id": "merge-linkedin-data-001",
+      "name": "Merge LinkedIn Data"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2160,
+        500
+      ],
+      "id": "final-merge-001",
+      "name": "Merge All Data"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2400,
+        720
+      ],
+      "id": "ai-model-research-001",
+      "name": "AI Research Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "JW58mv7uuR54fXsx",
+          "name": "YT Aug 19th"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"date\": \"2024-01-15\",\n  \"email\": \"john@example.com\",\n  \"leadName\": \"John Doe\",\n  \"companyName\": \"Example Corp\",\n  \"monthlyRevenue\": \"$75,000\",\n  \"aiInterestSummary\": \"High interest in AI automation, currently exploring chatbot solutions\",\n  \"potentialCompanySolutions\": \"AI chatbot for customer support, workflow automation, lead scoring system\",\n  \"decisionMaker\": true\n}"
+      },
+      "id": "output-parser-research-001",
+      "name": "Research Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2400,
+        840
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Company Domain: {{ $json.companyDomain }}\nCompany Website: {{ $json.companyWebsite }}\nCompany Email: {{ $json.companyEmail }}\nEmployee Count: {{ $json.employeeCount }}\nCompany LinkedIn: {{ $json.companyLinkedInUrl }}\nCompany Industry: {{ $json.companyIndustry }}\nCompany Description: {{ $json.companyDescription }}\nCompany Size: {{ $json.companySize }}\n\nLead Name: {{ $json.leadName }}\nLead LinkedIn: {{ $json.linkedInProfileUrl }}\nLead Job Title: {{ $json.profileJobTitle }}\nLead Email: {{ $json.profileEmail }}\nLead Headline: {{ $json.profileHeadline }}\nLead About: {{ $json.profileAbout }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an expert lead intelligence analyst specializing in AI Agency sales and implementation readiness.\n\nYour goal is to analyze the provided company and lead data to create a comprehensive intelligence report.\n\nFocus on:\n1. AI Readiness Assessment (1-10 score)\n2. Business maturity and revenue indicators\n3. Decision maker identification\n4. AI interest signals\n5. Potential automation opportunities\n6. Recommended AI solutions for their industry\n\nProvide structured output including:\n- date (today's date in YYYY-MM-DD format)\n- email (lead's email)\n- leadName (lead's full name)\n- companyName (company name)\n- monthlyRevenue (estimated monthly revenue - if unknown, estimate based on company size and industry)\n- aiInterestSummary (brief summary of AI interest signals)\n- potentialCompanySolutions (recommended AI solutions)\n- decisionMaker (true/false - is this person a decision maker?)\n\nBe data-driven and specific in your analysis."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2400,
+        500
+      ],
+      "id": "research-agent-001",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2640,
+        720
+      ],
+      "id": "ai-model-scoring-001",
+      "name": "AI Scoring Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "JW58mv7uuR54fXsx",
+          "name": "YT Aug 19th"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"score\": 50\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2640,
+        840
+      ],
+      "id": "output-parser-scoring-001",
+      "name": "Scoring Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Research Output:\n{{ $json.output }}\n\nCompany Domain: {{ $('New Lead').item.json['Company Domain'] }}\nAI Interest: {{ $json.output.aiInterestSummary }}\nPotential Solutions: {{ $json.output.potentialCompanySolutions }}\nMonthly Revenue: {{ $json.output.monthlyRevenue }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a lead qualification specialist for an AI Agency. Score this lead based on their fit for our AI implementation services.\n\nScoring Criteria:\n1. Revenue Requirement (0-30 points): Must be generating at least $50k/month. Award full points for $50k+/month, scale down proportionally for lower revenue, 0 points if under $25k/month\n2. Business Maturity (0-25 points): Well-established business with proven track record, stable operations, professional team\n3. AI Interest & Readiness (0-25 points): Based on the AI Interest Research findings - current AI adoption, interest signals, readiness to implement\n4. Company Size & Structure (0-10 points): Team size, organizational complexity, decision-making capability\n5. Industry Fit (0-10 points): Industries where AI implementation has high ROI and clear use cases\n\nProvide:\n- Overall Lead Score (0-100)\n- Only output the single number as \"score\" field, no notes or text.\n\nBe data-driven and specific in your scoring."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2640,
+        500
+      ],
+      "id": "scoring-agent-001",
+      "name": "Lead Scoring Agent"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1CrLwmb92d8GU77yFLd1vZu08XE8W47zqrS5rkdgfmAs",
+          "mode": "list",
+          "cachedResultName": "Lead Research Analyst",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CrLwmb92d8GU77yFLd1vZu08XE8W47zqrS5rkdgfmAs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10FERi5U37GRpUS3soH9zQ4Az-sLPY6ssFB1LM1E7t_8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Research Agent').item.json.output.email }}",
+            "Company Name": "={{ $('Research Agent').item.json.output.companyName }}",
+            "Potential Company Solutions": "={{ $('Research Agent').item.json.output.potentialCompanySolutions }}",
+            "Score": "={{ $json.output.score }}",
+            "Date": "={{ $('Research Agent').item.json.output.date }}",
+            "Decision Maker?": "={{ $('Research Agent').item.json.output.decisionMaker }}",
+            "Name": "={{ $('Research Agent').item.json.output.leadName }}",
+            "Revenue": "={{ $('Research Agent').item.json.output.monthlyRevenue }}",
+            "Interest Summary": "={{ $('Research Agent').item.json.output.aiInterestSummary }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision Maker?",
+              "displayName": "Decision Maker?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Revenue",
+              "displayName": "Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interest Summary",
+              "displayName": "Interest Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Potential Company Solutions",
+              "displayName": "Potential Company Solutions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2880,
+        500
+      ],
+      "id": "append-sheet-001",
+      "name": "Append to Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "m7xiSuoqHvxyxHZq",
+          "name": "micheletorti5 | Connection 5th Sept"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Lead Scoring Agent').item.json.output.score }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "route-hot-001"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Hot Lead (70-100)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Lead Scoring Agent').item.json.output.score }}",
+                    "rightValue": 40,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "route-warm-001"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Warm Lead (40-69)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Lead Scoring Agent').item.json.output.score }}",
+                    "rightValue": 40,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    },
+                    "id": "route-cold-001"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cold Lead (0-39)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "route-score-001",
+      "name": "Route by Score",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        3120,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "hundredmilliondollarpeanuts@gmail.com",
+        "subject": "=HOT LEAD ALERT - Score: {{ $('Lead Scoring Agent').item.json.output.score }}",
+        "emailType": "text",
+        "message": "=*Company:* {{ $('Research Agent').item.json.output.companyName }}\n*Lead Name:* {{ $('Research Agent').item.json.output.leadName }}\n*Email:* {{ $('Research Agent').item.json.output.email }}\n*Monthly Revenue:* {{ $('Research Agent').item.json.output.monthlyRevenue }}\n*AI Interest:* {{ $('Research Agent').item.json.output.aiInterestSummary }}\n*Recommended Solutions:* {{ $('Research Agent').item.json.output.potentialCompanySolutions }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3360,
+        300
+      ],
+      "id": "email-hot-001",
+      "name": "Hot Lead Email",
+      "webhookId": "254e49fb-a447-44f0-8270-904eb62efa28",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SxAixly4TEOkIP6d",
+          "name": "Test Jm Solutionss"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "hundredmilliondollarpeanuts@gmail.com",
+        "subject": "=Warm Lead - Score: {{ $('Lead Scoring Agent').item.json.output.score }}",
+        "emailType": "text",
+        "message": "=*Company:* {{ $('Research Agent').item.json.output.companyName }}\n*Lead Name:* {{ $('Research Agent').item.json.output.leadName }}\n*Email:* {{ $('Research Agent').item.json.output.email }}\n*Monthly Revenue:* {{ $('Research Agent').item.json.output.monthlyRevenue }}\n*AI Interest:* {{ $('Research Agent').item.json.output.aiInterestSummary }}\n*Recommended Solutions:* {{ $('Research Agent').item.json.output.potentialCompanySolutions }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3360,
+        500
+      ],
+      "id": "email-warm-001",
+      "name": "Warm Lead Email",
+      "webhookId": "254e49fb-a447-44f0-8270-904eb62efa28",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SxAixly4TEOkIP6d",
+          "name": "Test Jm Solutionss"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "hundredmilliondollarpeanuts@gmail.com",
+        "subject": "=Cold Lead - Score: {{ $('Lead Scoring Agent').item.json.output.score }}",
+        "emailType": "text",
+        "message": "=*Company:* {{ $('Research Agent').item.json.output.companyName }}\n*Lead Name:* {{ $('Research Agent').item.json.output.leadName }}\n*Email:* {{ $('Research Agent').item.json.output.email }}\n*Monthly Revenue:* {{ $('Research Agent').item.json.output.monthlyRevenue }}\n*AI Interest:* {{ $('Research Agent').item.json.output.aiInterestSummary }}\n*Recommended Solutions:* {{ $('Research Agent').item.json.output.potentialCompanySolutions }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3360,
+        700
+      ],
+      "id": "email-cold-001",
+      "name": "Cold Lead Email",
+      "webhookId": "254e49fb-a447-44f0-8270-904eb62efa28",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SxAixly4TEOkIP6d",
+          "name": "Test Jm Solutionss"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# 1. New Lead Form\n",
+        "height": 320,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        360
+      ],
+      "typeVersion": 1,
+      "id": "note-section-1",
+      "name": "Section 1 Note"
+    },
+    {
+      "parameters": {
+        "content": "# 2. Company Data Enrichment\n\nLinkFinder AI enriches company data:\n- Website\n- Email\n- Employee count\n- LinkedIn URL",
+        "height": 560,
+        "width": 352,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        280
+      ],
+      "typeVersion": 1,
+      "id": "note-section-2",
+      "name": "Section 2 Note"
+    },
+    {
+      "parameters": {
+        "content": "# 3. LinkedIn Enrichment\n\nScrapes LinkedIn profile and company data",
+        "height": 320,
+        "width": 352,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1360,
+        360
+      ],
+      "typeVersion": 1,
+      "id": "note-section-3",
+      "name": "Section 3 Note"
+    },
+    {
+      "parameters": {
+        "content": "# 4. AI Analysis\n\nAI agents analyze lead data and score",
+        "height": 480,
+        "width": 432,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2320,
+        360
+      ],
+      "typeVersion": 1,
+      "id": "note-section-4",
+      "name": "Section 4 Note"
+    },
+    {
+      "parameters": {
+        "content": "# 5. Data Storage & Routing\n\nSaves to Google Sheets and routes by score",
+        "height": 480,
+        "width": 688,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2800,
+        360
+      ],
+      "typeVersion": 1,
+      "id": "note-section-5",
+      "name": "Section 5 Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Lead": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Company Website",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkFinder AI - Company Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkFinder AI - Employee Count",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkFinder AI - Company LinkedIn URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Company Website": {
+      "main": [
+        [
+          {
+            "node": "Merge Company Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Company Email": {
+      "main": [
+        [
+          {
+            "node": "Merge Company Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Employee Count": {
+      "main": [
+        [
+          {
+            "node": "Merge Company Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Company LinkedIn URL": {
+      "main": [
+        [
+          {
+            "node": "Merge Company Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Company Data": {
+      "main": [
+        [
+          {
+            "node": "Has LinkedIn Profile?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has LinkedIn Profile?": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - LinkedIn Profile Info",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkFinder AI - Company LinkedIn Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge All Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - LinkedIn Profile Info": {
+      "main": [
+        [
+          {
+            "node": "Merge LinkedIn Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Company LinkedIn Info": {
+      "main": [
+        [
+          {
+            "node": "Merge LinkedIn Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge LinkedIn Data": {
+      "main": [
+        [
+          {
+            "node": "Merge All Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Data": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Research Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Lead Scoring Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Scoring Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Lead Scoring Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scoring Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Lead Scoring Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Scoring Agent": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Route by Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Score": {
+      "main": [
+        [
+          {
+            "node": "Hot Lead Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Warm Lead Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cold Lead Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "92794674-c622-42b6-ba71-0ddb2b03fd1d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "497b9f82c9e2221fea60e82fa63290386b7aadcded14b21ff31b0075b1df1efd"
+  },
+  "id": "r9D5AhjIgdYn4Ihu",
+  "tags": []
+}
