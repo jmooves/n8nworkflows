@@ -1,0 +1,837 @@
+{
+  "name": "Steal Your Competitor's Sales Team",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔍 About LinkFinder AI\n\nLinkFinder AI is a powerful tool to enrich leads and companies and scrape LinkedIn without needing a LinkedIn account.\n\n**Get your API key:** https://linkfinderai.com\n\n---\n\n## 📊 What This Workflow Does\n\nThis workflow helps you identify and extract contact information for sales professionals working at your competitor companies. In less than 60 seconds, you can build a comprehensive list of sales reps, account executives, and business development professionals from up to 3 competitor companies.\n\n**The workflow:**\n1. Takes competitor company names as input\n2. Finds their LinkedIn company pages\n3. Scrapes all employees from those companies\n4. Filters for sales-related job titles\n5. Enriches each sales rep with full LinkedIn profile data\n6. Exports complete contact information to Google Sheets\n\n**Use Cases:**\n- Build targeted recruitment lists for sales talent\n- Understand competitor sales team structure\n- Identify potential hires with specific experience\n- Research competitive sales strategies\n- Build outreach lists for industry connections\n- Analyze competitor go-to-market approach\n\n**Input Required:**\n- Company names (up to 3 competitors)\n- Edit the \"Input Companies\" node with your competitor names\n\n**Output Provided:**\n- Sales rep full names\n- Current job titles\n- Company names\n- Email addresses (when available)\n- Phone numbers (when available)\n- LinkedIn profile URLs\n- Company information\n- Location data\n- Years of experience\n- Premium status indicators\n\n**Workflow Steps:**\n1. Input up to 3 competitor company names\n2. Find LinkedIn company URLs for each competitor\n3. Extract all employees from each company\n4. Filter for sales-related job titles (Sales Rep, Account Executive, BDR, SDR, etc.)\n5. Batch process employee profiles (10 at a time to avoid rate limits)\n6. Enrich each sales rep with full LinkedIn profile data\n7. Extract and format contact information\n8. Remove duplicate profiles\n9. Export final list to Google Sheets with all contact details\n\n---\n\n## ⚙️ Setup Instructions\n\n1. **Get LinkFinder AI API Key**\n   - Visit https://linkfinderai.com\n   - Sign up and copy your API key\n\n2. **Configure All LinkFinder AI Nodes**\n   - Find each node named \"LinkFinder AI - [Service]\"\n   - Open the node settings\n   - Expand the Headers section\n   - Find the Authorization header\n   - Replace YOUR_API_KEY_HERE with your actual API key\n   - Do this for ALL 3 LinkFinder AI nodes\n\n3. **Configure Input Companies**\n   - Open the \"📝 Input Companies\" node\n   - Edit the company names to your top 3 competitors\n   - Example: \"Salesforce\", \"HubSpot\", \"Microsoft\"\n\n4. **Configure Google Sheets Output**\n   - Open the \"💾 Export to Google Sheets\" node\n   - Connect your Google Sheets account\n   - Select or create a spreadsheet\n   - Choose or create a sheet (e.g., \"Competitor Sales Reps\")\n\n5. **Adjust Sales Title Filters (Optional)**\n   - Open the \"🎯 Filter Sales Roles\" node\n   - Edit the job title keywords if needed\n   - Default filters: sales, account executive, business development, SDR, BDR, account manager\n\n6. **Test the Workflow**\n   - Click \"Test workflow\" button\n   - Wait for processing (may take 30-90 seconds)\n   - Verify all nodes execute successfully\n   - Check Google Sheets for output data\n\n7. **Activate**\n   - Once tested successfully, you can activate for scheduled runs\n   - Or use manual trigger whenever needed\n\n---\n\n## 🔧 LinkFinder AI Services Used\n\n**company_name_to_linkedin_url**\n- Converts company names to LinkedIn company page URLs\n- Critical first step to identify the right company\n\n**linkedin_company_to_employees**\n- Scrapes all employee profiles from a LinkedIn company page\n- Returns list of employees with basic info and LinkedIn URLs\n\n**linkedin_profile_to_linkedin_info**\n- Enriches individual LinkedIn profiles with complete data\n- Returns email, phone, job details, company info, and more\n\n---\n\n## 💡 Tips & Best Practices\n\n- **Start with 1-3 companies**: Processing large companies takes longer\n- **Run during business hours**: Better data accuracy for active profiles\n- **Review job titles**: Adjust filters based on your specific sales roles\n- **Batch processing**: Workflow processes 10 profiles at a time to avoid rate limits\n- **Export regularly**: Save results before processing additional companies\n- **Use for recruitment**: Reach out to top performers with compelling offers\n- **Combine with other data**: Cross-reference with company performance metrics\n- **Respect privacy**: Use data ethically and in compliance with regulations\n\n---\n\n## ⚠️ Important Notes\n\n- **Rate limits**: Workflow processes in batches to respect API limits\n- **Data accuracy**: Email/phone availability varies by profile privacy settings\n- **Processing time**: Large companies (1000+ employees) may take 2-5 minutes\n- **Legal compliance**: Ensure your use complies with local data protection laws\n- **Privacy considerations**: This data is publicly available on LinkedIn\n- **Ethical usage**: Use for legitimate recruitment and business purposes only\n- **LinkedIn ToS**: This tool doesn't violate LinkedIn ToS as it doesn't require login\n\n---\n\n## 🎯 Advanced Usage\n\n**Filter by seniority:**\n- Modify the filter node to target specific levels (VP, Director, Senior, etc.)\n\n**Export to CRM:**\n- Replace Google Sheets node with your CRM integration\n- Map fields to match your CRM's contact structure\n\n**Schedule regular scans:**\n- Add a Schedule Trigger to run weekly/monthly\n- Track new hires at competitor companies\n\n**Combine with other enrichment:**\n- Add email validation nodes\n- Add company data enrichment\n- Add social media profile finder",
+        "height": 520,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        250,
+        240
+      ],
+      "name": "📖 Workflow Documentation"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        700,
+        460
+      ],
+      "name": "▶️ Start - Click to Test"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "company1",
+              "name": "companies",
+              "value": "=[\"Salesforce\", \"HubSpot\", \"Outreach\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        920,
+        460
+      ],
+      "name": "📝 Input Companies (Edit Here)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "split1",
+              "name": "companyName",
+              "value": "={{ $json.companies }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1140,
+        460
+      ],
+      "name": "🔀 Split Companies"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_linkedin_url"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.companyName }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        460
+      ],
+      "name": "LinkFinder AI - Get Company LinkedIn",
+      "notes": "Service: company_name_to_linkedin_url\n\nConverts company name to LinkedIn company page URL\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "check2",
+              "leftValue": "={{ $json.result }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1580,
+        460
+      ],
+      "name": "✅ Company URL Found?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_company_to_employees"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.result }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1800,
+        360
+      ],
+      "name": "LinkFinder AI - Get All Employees",
+      "notes": "Service: linkedin_company_to_employees\n\nScrapes all employees from company LinkedIn page\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "split2",
+              "name": "employee",
+              "value": "={{ $json.result }}",
+              "type": "object"
+            },
+            {
+              "id": "company",
+              "name": "companyName",
+              "value": "={{ $('📝 Input Companies (Edit Here)').item.json.companyName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2020,
+        360
+      ],
+      "name": "🔀 Split Employee List"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": false,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "title1",
+              "leftValue": "={{ $json.employee.title.toLowerCase() }}",
+              "rightValue": "sales",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "title2",
+              "leftValue": "={{ $json.employee.title.toLowerCase() }}",
+              "rightValue": "account executive",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "title3",
+              "leftValue": "={{ $json.employee.title.toLowerCase() }}",
+              "rightValue": "business development",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "title4",
+              "leftValue": "={{ $json.employee.title.toLowerCase() }}",
+              "rightValue": "sdr",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "title5",
+              "leftValue": "={{ $json.employee.title.toLowerCase() }}",
+              "rightValue": "bdr",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "title6",
+              "leftValue": "={{ $json.employee.title.toLowerCase() }}",
+              "rightValue": "account manager",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        360
+      ],
+      "name": "🎯 Filter Sales Roles"
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2460,
+        260
+      ],
+      "name": "🔄 Process in Batches (10)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.employee.linkedinUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2680,
+        260
+      ],
+      "name": "LinkFinder AI - Enrich Profile",
+      "notes": "Service: linkedin_profile_to_linkedin_info\n\nEnriches profile with email, phone, and full details\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "success1",
+              "leftValue": "={{ $json.fullName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2900,
+        260
+      ],
+      "name": "✅ Profile Enriched?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "name",
+              "name": "fullName",
+              "value": "={{ $json.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "title",
+              "name": "jobTitle",
+              "value": "={{ $json.jobTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "company",
+              "name": "companyName",
+              "value": "={{ $json.companyName }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "={{ $json.email || 'Not Available' }}",
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $json.mobileNumber || 'Not Available' }}",
+              "type": "string"
+            },
+            {
+              "id": "linkedin",
+              "name": "linkedinUrl",
+              "value": "={{ $json.linkedinUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "location",
+              "name": "location",
+              "value": "={{ $json.jobLocation || $json.addressWithCountry || 'Not Available' }}",
+              "type": "string"
+            },
+            {
+              "id": "headline",
+              "name": "headline",
+              "value": "={{ $json.headline || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "connections",
+              "name": "connections",
+              "value": "={{ $json.connections || '0' }}",
+              "type": "string"
+            },
+            {
+              "id": "premium",
+              "name": "isPremium",
+              "value": "={{ $json.isPremium || false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "experience",
+              "name": "firstRoleYear",
+              "value": "={{ $json.firstRoleYear || 'Unknown' }}",
+              "type": "string"
+            },
+            {
+              "id": "companyLinkedin",
+              "name": "companyLinkedin",
+              "value": "={{ $json.companyLinkedin || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3120,
+        160
+      ],
+      "name": "📊 Format Sales Rep Data"
+    },
+    {
+      "parameters": {
+        "mode": "remove",
+        "compare": "selectedFields",
+        "fieldsToCompare": {
+          "fields": [
+            {
+              "fieldName": "linkedinUrl"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 1.2,
+      "position": [
+        3340,
+        160
+      ],
+      "name": "🔄 Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "linkedinUrl"
+          ],
+          "schema": [
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "jobTitle",
+              "displayName": "jobTitle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "companyName",
+              "displayName": "companyName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "linkedinUrl",
+              "displayName": "linkedinUrl",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "headline",
+              "displayName": "headline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "connections",
+              "displayName": "connections",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "isPremium",
+              "displayName": "isPremium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "firstRoleYear",
+              "displayName": "firstRoleYear",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "companyLinkedin",
+              "displayName": "companyLinkedin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3560,
+        160
+      ],
+      "name": "💾 Export to Google Sheets",
+      "notes": "Configure this node:\n1. Connect Google Sheets\n2. Select/create spreadsheet\n3. Choose sheet name\n4. Fields auto-map from input"
+    },
+    {
+      "parameters": {
+        "content": "## 🎯 Sales Title Filters\n\nThis node filters employees to only include sales-related roles.\n\n**Current filters match titles containing:**\n- \"sales\"\n- \"account executive\"\n- \"business development\"\n- \"SDR\" (Sales Development Rep)\n- \"BDR\" (Business Development Rep)\n- \"account manager\"\n\n**To customize:**\n1. Open this IF node\n2. Add/remove/edit conditions\n3. Use OR combinator to match any keyword\n\n**Examples of matched titles:**\n- Sales Development Representative\n- Senior Account Executive\n- Business Development Manager\n- Enterprise Sales Director\n- Strategic Account Manager\n- Outbound SDR\n\n**Pro tip:** Add more specific filters like:\n- \"enterprise\" for enterprise sales\n- \"inside sales\" for inside reps\n- \"VP\" or \"Director\" for leadership",
+        "height": 360,
+        "width": 340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        520
+      ],
+      "name": "💡 Filter Configuration Tips"
+    },
+    {
+      "parameters": {
+        "content": "## ⚠️ IMPORTANT: Batch Processing\n\nThis workflow processes profiles in batches of 10 to:\n\n1. **Respect API rate limits**\n2. **Ensure data quality**\n3. **Prevent timeouts**\n\n**For large companies (500+ employees):**\n- Expect 2-5 minute processing time\n- The batch node will loop automatically\n- Don't interrupt the workflow mid-process\n\n**If processing fails:**\n- Check API key is configured\n- Verify rate limits not exceeded\n- Try reducing batch size to 5\n- Process one company at a time",
+        "height": 280,
+        "width": 300,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        520
+      ],
+      "name": "⚠️ Batch Processing Info"
+    }
+  ],
+  "connections": {
+    "▶️ Start - Click to Test": {
+      "main": [
+        [
+          {
+            "node": "📝 Input Companies (Edit Here)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Input Companies (Edit Here)": {
+      "main": [
+        [
+          {
+            "node": "🔀 Split Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Split Companies": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Company LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Company LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "✅ Company URL Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ Company URL Found?": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get All Employees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get All Employees": {
+      "main": [
+        [
+          {
+            "node": "🔀 Split Employee List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Split Employee List": {
+      "main": [
+        [
+          {
+            "node": "🎯 Filter Sales Roles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 Filter Sales Roles": {
+      "main": [
+        [
+          {
+            "node": "🔄 Process in Batches (10)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Process in Batches (10)": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Enrich Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Enrich Profile": {
+      "main": [
+        [
+          {
+            "node": "✅ Profile Enriched?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ Profile Enriched?": {
+      "main": [
+        [
+          {
+            "node": "📊 Format Sales Rep Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Format Sales Rep Data": {
+      "main": [
+        [
+          {
+            "node": "🔄 Process in Batches (10)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "💾 Export to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
