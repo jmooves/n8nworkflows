@@ -1,0 +1,563 @@
+{
+  "meta": {
+    "instanceId": "21754f977ce20b07e6fe64be3fbc663f6e6f730423d6e46c6cd2bf5b5e70a383"
+  },
+  "nodes": [
+    {
+      "id": "49a3829e-3127-4761-8ac0-edaa6d0224c2",
+      "name": "LinkFinder AI - LinkedIn Profile Scraper",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3820,
+        680
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json['Linkden URL'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "typeVersion": 4.2,
+      "notes": "Service: linkedin_profile_to_linkedin_info\\n\\nScrapes LinkedIn profile without account.\\n\\nAccess fields directly: $json.email, $json.fullName, etc.\\n\\nGet API key: https://linkfinderai.com\\n\\nReplace YOUR_API_KEY_HERE in Authorization header"
+    },
+    {
+      "id": "705aef1b-5e45-4fe8-b1fd-5ebb5d461dd5",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        3760,
+        1140
+      ],
+      "parameters": {},
+      "typeVersion": 1
+    },
+    {
+      "id": "f2b8a1b8-13b6-4de3-9cde-336494bf31dc",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        3140,
+        940
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "typeVersion": 1.1
+    },
+    {
+      "id": "28b1d9c4-c89e-460d-8a5b-0fea42d2d1d8",
+      "name": "📖 Workflow Documentation",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2260,
+        240
+      ],
+      "parameters": {
+        "content": "## 🔍 About LinkFinder AI\\n\\nLinkFinder AI is a powerful tool to enrich leads and companies and scrape LinkedIn without needing a LinkedIn account.\\n\\n**Get your API key:** https://linkfinderai.com\\n\\n---\\n\\n## 📊 What This Workflow Does\\n\\nThis workflow automatically enriches LinkedIn profile URLs stored in a Google Sheet by scraping comprehensive profile information including contact details, job information, education, skills, and more. The workflow runs on a schedule and updates the Google Sheet with the enriched data.\\n\\n**Input Required:**\\n- Google Sheet with LinkedIn profile URLs in a column named \\"Linkden URL\\"\\n- Column \\"ID\\" for tracking rows\\n- Empty columns for: Name, Gender, Email, Job Title, Summery, Education, Location, Skills, Picture\\n\\n**Output Provided:**\\n- Full name from LinkedIn profile\\n- Gender\\n- Email address\\n- Job title\\n- Professional summary\\n- Education details\\n- Location\\n- Skills list\\n- Profile picture URL\\n\\n**Workflow Steps:**\\n1. Schedule trigger activates workflow at regular intervals\\n2. Read all rows from Google Sheet\\n3. Check if row needs enrichment (has LinkedIn URL but missing other data)\\n4. Scrape LinkedIn profile using LinkFinder AI\\n5. Merge original data with scraped information\\n6. Format and map fields to match Google Sheet columns\\n7. Update Google Sheet with enriched data\\n\\n---\\n\\n## ⚙️ Setup Instructions\\n\\n1. **Get LinkFinder AI API Key**\\n   - Visit https://linkfinderai.com\\n   - Sign up and copy your API key\\n\\n2. **Configure LinkFinder AI Node**\\n   - Find the node named \\"LinkFinder AI - LinkedIn Profile Scraper\\"\\n   - Open the node settings\\n   - Expand the Headers section\\n   - Find the Authorization header\\n   - Replace YOUR_API_KEY_HERE with your actual API key\\n\\n3. **Configure Google Sheets Nodes**\\n   - Setup Google Sheets OAuth2 credentials\\n   - Update the document ID to your Google Sheet\\n   - Ensure column names match: ID, Linkden URL, Name, Gender, Email, Education, Location, Job Title, Summery, Skills, Picture\\n\\n4. **Test the Workflow**\\n   - Add some LinkedIn profile URLs to your Google Sheet\\n   - Click \\"Test workflow\\" button\\n   - Verify all nodes execute successfully\\n   - Check Google Sheet is updated with enriched data\\n\\n5. **Activate**\\n   - Once tested successfully, activate the workflow\\n   - It will run automatically based on the schedule\\n\\n---\\n\\n## 🔧 LinkFinder AI Services Used\\n\\n**linkedin_profile_to_linkedin_info**\\n- Scrapes complete LinkedIn profile information\\n- Returns: fullName, email, jobTitle, companyName, headline, about, location, education, skills, profilePic, and more\\n- No LinkedIn account required\\n- Direct field access (e.g., $json.email, $json.fullName)\\n\\n---\\n\\n## ⚠️ Important Notes\\n\\n- All external service dependencies removed (Prospeo.io)\\n- Workflow now uses ONLY LinkFinder AI and native n8n nodes\\n- Achieves same functionality as original workflow\\n- API key must be configured in the LinkFinder AI node\\n- Schedule can be adjusted in the Schedule Trigger node\\n- Conditional logic ensures only incomplete rows are processed",
+        "height": 464,
+        "width": 389,
+        "color": 4
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "d8edc9fa-3012-46ab-9ed2-473f55213e78",
+      "name": "Conditional Check",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3520,
+        940
+      ],
+      "parameters": {
+        "options": {},
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "2b355bc4-0ef4-415a-a437-d8ed6538c1e3",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.Name }}",
+              "rightValue": ""
+            },
+            {
+              "id": "1757a7d7-ce91-4df1-b54d-c9285f88e3ee",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.Gender }}",
+              "rightValue": ""
+            },
+            {
+              "id": "78089c18-e9d6-40e5-8d0c-e2b96c1f1348",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json['Job Title'] }}",
+              "rightValue": ""
+            },
+            {
+              "id": "0ee10296-113d-4467-92d7-368111426cf5",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.Summery }}",
+              "rightValue": ""
+            },
+            {
+              "id": "2ec7486d-e753-4c87-a6df-10056c7ee4b2",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json['Linkden URL'] }}",
+              "rightValue": ""
+            }
+          ]
+        }
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "bdf82dbf-7b6b-4d42-9a6a-34d5cfb691ad",
+      "name": "Field Editing",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        4100,
+        900
+      ],
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "Name",
+              "stringValue": "={{ $json.fullName }}"
+            },
+            {
+              "name": "Gender",
+              "stringValue": "={{ $json.gender || '' }}"
+            },
+            {
+              "name": "Email",
+              "stringValue": "={{ $json.email }}"
+            },
+            {
+              "name": "Summary",
+              "stringValue": "={{ $json.about || '' }}"
+            },
+            {
+              "name": "Education",
+              "stringValue": "={{ $json.education || '' }}"
+            },
+            {
+              "name": "Skills",
+              "stringValue": "={{ $json.skills || '' }}"
+            },
+            {
+              "name": "Picture",
+              "stringValue": "={{ $json.profilePic }}"
+            },
+            {
+              "name": "Job Title",
+              "stringValue": "={{ $json.jobTitle }}"
+            },
+            {
+              "name": "Location",
+              "stringValue": "={{ $json.addressWithCountry || $json.jobLocation || '' }}"
+            },
+            {
+              "name": "Linkden link",
+              "stringValue": "={{ $json.linkedinUrl }}"
+            },
+            {
+              "name": "ID",
+              "stringValue": "={{ $json.ID }}"
+            }
+          ]
+        },
+        "include": "selected",
+        "options": {}
+      },
+      "typeVersion": 3.2
+    },
+    {
+      "id": "897734e2-5d05-4480-a24b-e4b3ae44dce6",
+      "name": "Data Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        3860,
+        900
+      ],
+      "parameters": {
+        "mode": "combine",
+        "options": {},
+        "combinationMode": "mergeByPosition"
+      },
+      "typeVersion": 2.1
+    },
+    {
+      "id": "92a9861d-9e42-4fe2-84a7-03b3b0dbb1b0",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2300,
+        520
+      ],
+      "parameters": {
+        "color": 5,
+        "width": 803.4846614963799,
+        "height": 938.2393052135303,
+        "content": "- **Schedule Trigger:**\\n  - Description: This node triggers the workflow based on a defined schedule interval, in this case, based on minutes.\\n  - Documentation: [Schedule Trigger Node](https://docs.n8n.io/nodes/n8n-nodes-base.scheduleTrigger)\\n\\n- **Google Sheets Read:**\\n  - Description: This node reads data from a Google Sheets document and sheet based on the provided document ID and sheet name.\\n  - Documentation: [Google Sheets Node](https://docs.n8n.io/nodes/n8n-nodes-base.googleSheets)\\n\\n- **Conditional Check:**\\n  - Description: This node checks multiple conditions based on the input data and performs further actions based on the conditions.\\n  - Documentation: [Conditional Node](https://docs.n8n.io/nodes/n8n-nodes-base.if)\\n\\n- **LinkFinder AI - LinkedIn Profile Scraper:**\\n  - Description: This node scrapes LinkedIn profile data using LinkFinder AI service without requiring a LinkedIn account.\\n  - Get API Key: https://linkfinderai.com\\n\\n- **No Operation, do nothing:**\\n  - Description: This node does not perform any operation and is used as a placeholder.\\n  - Documentation: [No Operation Node](https://docs.n8n.io/nodes/n8n-nodes-base.noOp)\\n\\n- **Data Merge:**\\n  - Description: This node merges data based on the specified mode and combination settings to combine multiple fields into a single object.\\n  - Documentation: [Merge Node](https://docs.n8n.io/nodes/n8n-nodes-base.merge)\\n\\n- **Field Editing:**\\n  - Description: This node edits fields by setting specific values for each field based on the provided input data.\\n  - Documentation: [Set Node](https://docs.n8n.io/nodes/n8n-nodes-base.set)\\n\\n- **Google Sheets Update:**\\n  - Description: This node updates data in a Google Sheets document and sheet based on the specified columns and values.\\n  - Documentation: [Google Sheets Node](https://docs.n8n.io/nodes/n8n-nodes-base.googleSheets)"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "644f38d3-ccf0-4ce3-b759-e129e1074512",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3660,
+        460
+      ],
+      "parameters": {
+        "width": 468.54622634118857,
+        "height": 380.67540639666913,
+        "content": "## LinkFinder AI - LinkedIn Profile Scraper\\n\\n**Service Used:** linkedin_profile_to_linkedin_info\\n\\n**What it does:**\\n- Scrapes complete LinkedIn profile information\\n- No LinkedIn account required\\n- Returns comprehensive profile data\\n\\n**Data Returned:**\\n- Full name, email, job title\\n- Gender, location, company info\\n- Education, skills, summary\\n- Profile and background pictures\\n- And much more...\\n\\n**Setup:**\\n1. Get API key from https://linkfinderai.com\\n2. Replace YOUR_API_KEY_HERE in node configuration\\n3. Ensure LinkedIn URL is provided in input\\n\\n**Access Pattern:**\\n- Direct field access (e.g., $json.email)\\n- NOT $json.result.email",
+        "color": 4
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "8ddaddad-b976-46c5-b8a1-e49ecb493e87",
+      "name": "Get links from Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3340,
+        940
+      ],
+      "parameters": {
+        "options": {},
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ochnGSCy8V5Mz-nr51dBmugqR50m62K7d6pvbwOHewo/edit#gid=0",
+          "cachedResultName": "الورقة1"
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1ochnGSCy8V5Mz-nr51dBmugqR50m62K7d6pvbwOHewo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ochnGSCy8V5Mz-nr51dBmugqR50m62K7d6pvbwOHewo/edit?usp=drivesdk",
+          "cachedResultName": "linkden URls"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "credential-id",
+          "name": "googleSheetsOAuth2Api Credential"
+        }
+      },
+      "typeVersion": 4.2
+    },
+    {
+      "id": "0923a13d-1097-432d-b22e-375fec9f383e",
+      "name": "Update the sheet with information",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        4320,
+        900
+      ],
+      "parameters": {
+        "columns": {
+          "value": {
+            "ID": "={{ $json.ID }}",
+            "Name": "={{ $json.Name }}",
+            "Email": "={{ $json.Email }}",
+            "Gender": "={{ $json.Gender }}",
+            "Skills": "={{ $json.Skills }}",
+            "Picture": "={{ $json.Picture }}",
+            "Summery": "={{ $json.Summary }}",
+            "Location": "={{ $json.Location }}",
+            "Education": "={{ $json.Education }}",
+            "Job Title": "={{ $json['Job Title'] }}"
+          },
+          "schema": [
+            {
+              "id": "ID",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "ID",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Linkden URL",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "Linkden URL",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Gender",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Gender",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Email",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Education",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Education",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Location",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Title",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Job Title",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summery",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Summery",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Skills",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Skills",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Picture",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Picture",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": true,
+              "required": false,
+              "displayName": "row_number",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "ID"
+          ]
+        },
+        "options": {},
+        "operation": "update",
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ochnGSCy8V5Mz-nr51dBmugqR50m62K7d6pvbwOHewo/edit#gid=0",
+          "cachedResultName": "الورقة1"
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1ochnGSCy8V5Mz-nr51dBmugqR50m62K7d6pvbwOHewo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ochnGSCy8V5Mz-nr51dBmugqR50m62K7d6pvbwOHewo/edit?usp=drivesdk",
+          "cachedResultName": "linkden URls"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "credential-id",
+          "name": "googleSheetsOAuth2Api Credential"
+        }
+      },
+      "typeVersion": 4.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Data Merge": {
+      "main": [
+        [
+          {
+            "node": "Field Editing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Field Editing": {
+      "main": [
+        [
+          {
+            "node": "Update the sheet with information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get links from Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conditional Check": {
+      "main": [
+        [
+          {
+            "node": "Data Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "LinkFinder AI - LinkedIn Profile Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get links from Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Conditional Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - LinkedIn Profile Scraper": {
+      "main": [
+        [
+          {
+            "node": "Data Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
