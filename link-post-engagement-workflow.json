@@ -1,0 +1,434 @@
+{
+  "name": "LinkedIn Post Engagement → Instant Lead List",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔍 LinkedIn Post Engagement → Instant Lead List\n\n**What it does:** Scrapes ALL people who engaged with a LinkedIn post (likes, comments, shares) and enriches each profile with full contact data. Processes 100+ leads per post.\n\n**Input:** LinkedIn post URL (any post with high engagement)\n\n**Output:** Complete list of engaged leads with:\n- Full name\n- Job title\n- Company name\n- Email address\n- Phone number\n- LinkedIn profile URL\n- Location\n\n**Scalability:** Processes unlimited reactions in batches of 10\n\n**Setup:**\n1. Get API key from https://linkfinderai.com\n2. Replace YOUR_API_KEY_HERE in both LinkFinder AI nodes\n3. Paste LinkedIn post URL in Input node\n4. Execute workflow\n5. Export enriched leads to CSV/CRM\n\n**Services used:**\n- linkedin_post_to_reactions (scrape all engagers)\n- linkedin_profile_to_linkedin_info (enrich each profile)\n\n**Perfect for:**\n- Mining competitors' viral posts for leads\n- Finding decision-makers engaging with industry content\n- Building targeted outreach lists from warm audiences\n- Competitor analysis and lead generation\n\n**Pro tip:** Posts with 1,000+ reactions = 1,000+ pre-qualified leads who care about the topic!",
+        "height": 420,
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [250, 240],
+      "name": "📖 Documentation"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [680, 460],
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "postUrl",
+              "name": "postUrl",
+              "value": "https://www.linkedin.com/feed/update/urn:li:activity:7000000000000000000/",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 460],
+      "name": "Input - Post URL"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_post_to_reactions"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.postUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 460],
+      "name": "LinkFinder AI - Scrape All Reactions"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "reactions",
+              "name": "reactions",
+              "value": "={{ $json.result }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1340, 460],
+      "name": "Extract Reactions Array"
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1560, 460],
+      "name": "Split Into Batches"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.profileUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 460],
+      "name": "LinkFinder AI - Enrich Profile"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "hasEmail",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [2000, 460],
+      "name": "Filter - Has Email"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fullName",
+              "name": "fullName",
+              "value": "={{ $json.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "name": "phone",
+              "value": "={{ $json.phoneNumber }}",
+              "type": "string"
+            },
+            {
+              "id": "jobTitle",
+              "name": "jobTitle",
+              "value": "={{ $json.jobTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "companyName",
+              "name": "companyName",
+              "value": "={{ $json.companyName }}",
+              "type": "string"
+            },
+            {
+              "id": "linkedinUrl",
+              "name": "linkedinUrl",
+              "value": "={{ $json.linkedinUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "location",
+              "name": "location",
+              "value": "={{ $json.location }}",
+              "type": "string"
+            },
+            {
+              "id": "enrichedAt",
+              "name": "enrichedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2220, 460],
+      "name": "Format Lead Data"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "fullName"
+            },
+            {
+              "fieldToAggregate": "email"
+            },
+            {
+              "fieldToAggregate": "phone"
+            },
+            {
+              "fieldToAggregate": "jobTitle"
+            },
+            {
+              "fieldToAggregate": "companyName"
+            },
+            {
+              "fieldToAggregate": "linkedinUrl"
+            },
+            {
+              "fieldToAggregate": "location"
+            },
+            {
+              "fieldToAggregate": "enrichedAt"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [2440, 460],
+      "name": "Aggregate All Leads"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "totalReactions",
+              "name": "totalReactions",
+              "value": "={{ $('Extract Reactions Array').item.json.reactions.length }}",
+              "type": "number"
+            },
+            {
+              "id": "qualifiedLeads",
+              "name": "qualifiedLeads",
+              "value": "={{ $json.fullName.length }}",
+              "type": "number"
+            },
+            {
+              "id": "conversionRate",
+              "name": "conversionRate",
+              "value": "={{ Math.round(($json.fullName.length / $('Extract Reactions Array').item.json.reactions.length) * 100) }}%",
+              "type": "string"
+            },
+            {
+              "id": "leads",
+              "name": "leads",
+              "value": "={{ $json }}",
+              "type": "object"
+            },
+            {
+              "id": "summary",
+              "name": "summary",
+              "value": "Found {{ $json.fullName.length }} qualified leads with contact data from {{ $('Extract Reactions Array').item.json.reactions.length }} total reactions",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2660, 460],
+      "name": "Final Results & Stats"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Input - Post URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input - Post URL": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Scrape All Reactions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Scrape All Reactions": {
+      "main": [
+        [
+          {
+            "node": "Extract Reactions Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Reactions Array": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Enrich Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Enrich Profile": {
+      "main": [
+        [
+          {
+            "node": "Filter - Has Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter - Has Email": {
+      "main": [
+        [
+          {
+            "node": "Format Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Aggregate All Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All Leads": {
+      "main": [
+        [
+          {
+            "node": "Final Results & Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
