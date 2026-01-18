@@ -1,0 +1,778 @@
+```json
+{
+  "name": "LinkedIn Post Engagement → Instant Lead List",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔍 About LinkFinder AI\n\nLinkFinder AI is a powerful tool to enrich leads and companies and scrape LinkedIn without needing a LinkedIn account.\n\n**Get your API key:** https://linkfinderai.com\n\n---\n\n## 📊 What This Workflow Does\n\nThis workflow transforms LinkedIn post engagement into a qualified lead database. It scrapes everyone who reacted to a LinkedIn post (likes, comments, shares), enriches their profiles with complete contact information, filters them by job criteria, and exports a ready-to-use lead list.\n\n**Use Cases:**\n- Extract leads from competitor's viral posts\n- Find engaged prospects from industry thought leaders\n- Build targeted lists from posts in your niche\n- Identify decision-makers showing interest in specific topics\n- Create warm outreach lists from engaged audiences\n\n**Input Required:**\n- LinkedIn post URL (the post with engagement you want to scrape)\n- Optional: Job title filter (e.g., \"CEO\", \"Director\", \"VP\")\n- Optional: Industry filter\n\n**Output Provided:**\n- Full name and job title\n- Company name and industry\n- Email address (when available)\n- Phone number (when available)\n- LinkedIn profile URL\n- Location and company size\n- Profile picture and background image\n- Current employment status\n- Connection count and followers\n- Premium status\n- Complete profile data for outreach personalization\n\n**Workflow Steps:**\n1. Input LinkedIn post URL\n2. Validate the URL format\n3. Scrape all reactions/engagements from the post\n4. Split into manageable batches (10 profiles at a time)\n5. For each engager: Fetch complete LinkedIn profile data\n6. Check API success for each profile\n7. Filter leads by job title criteria (optional)\n8. Remove duplicate profiles\n9. Format data for export\n10. Save to Google Sheets with all contact information\n\n---\n\n## ⚙️ Setup Instructions\n\n1. **Get LinkFinder AI API Key**\n   - Visit https://linkfinderai.com\n   - Sign up and copy your API key\n\n2. **Configure All LinkFinder AI Nodes**\n   - Find nodes named \"LinkFinder AI - Scrape Post Reactions\" and \"LinkFinder AI - Enrich Profile\"\n   - Open each node settings\n   - Expand the Headers section\n   - Find the Authorization header\n   - Replace YOUR_API_KEY_HERE with your actual API key\n\n3. **Configure Input**\n   - Open the \"📝 Input: Post URL\" node\n   - Replace the example LinkedIn post URL with your target post\n   - Optionally set job title filter in the \"🎯 Filter by Job Title\" node\n\n4. **Configure Google Sheets Output**\n   - Open the \"💾 Save to Google Sheets\" node\n   - Connect your Google account\n   - Select or create a spreadsheet\n   - Choose the sheet tab to save data\n\n5. **Test the Workflow**\n   - Click \"Test workflow\" button\n   - Verify all nodes execute successfully\n   - Check Google Sheets for exported data\n   - Review data quality and formatting\n\n6. **Activate**\n   - Once tested successfully, activate the workflow\n   - Run manually or set up a schedule trigger\n\n---\n\n## 🔧 LinkFinder AI Services Used\n\n**linkedin_post_to_reactions** - Scrapes all people who reacted to a LinkedIn post (likes, comments, shares). Returns array of profile URLs and reaction types.\n\n**linkedin_profile_to_linkedin_info** - Fetches complete profile information including contact details (email, phone), job information, company data, and engagement metrics. This is the most comprehensive enrichment service.\n\n---\n\n## 💡 Tips & Best Practices\n\n- Start with recent posts (last 30 days) for most accurate data\n- Posts with 500+ reactions work best for building large lists\n- Use job title filters to focus on decision-makers (CEO, VP, Director, Manager)\n- Check competitor posts in your industry for pre-qualified audiences\n- Look for posts about pain points your product solves\n- Combine with company size filters for enterprise/SMB targeting\n- Export to CRM systems for immediate outreach campaigns\n- Use profile pictures and background images for personalized outreach\n- Batch processing prevents API rate limit issues\n- Remove duplicates to avoid contacting same person twice\n\n---\n\n## ⚠️ Important Notes\n\n- Rate limits: Process in batches of 10 to stay within API limits\n- Data quality: Email/phone availability varies by profile completeness and privacy settings\n- Privacy: Only scrapes publicly available LinkedIn data\n- Best results: Posts with high engagement (500+ reactions) provide larger datasets\n- Processing time: Large posts (5000+ reactions) may take 10-15 minutes\n- Deduplication: Workflow automatically removes duplicate profiles\n- Job title filtering: Customize the filter criteria based on your ICP",
+        "height": 640,
+        "width": 460,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        220
+      ],
+      "name": "📖 Workflow Documentation"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        740,
+        460
+      ],
+      "name": "▶️ Start - Click to Test"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4",
+              "name": "linkedinPostUrl",
+              "value": "https://www.linkedin.com/posts/example-post-activity-1234567890",
+              "type": "string"
+            },
+            {
+              "id": "e5f6g7h8",
+              "name": "jobTitleFilter",
+              "value": "CEO,CTO,VP,Director,Head of",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        460
+      ],
+      "name": "📝 Input: Post URL (Edit This)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "i9j0k1l2",
+              "leftValue": "={{ $json.linkedinPostUrl }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "m3n4o5p6",
+              "leftValue": "={{ $json.linkedinPostUrl }}",
+              "rightValue": "linkedin.com",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1180,
+        460
+      ],
+      "name": "🔍 Validate Post URL"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_post_to_reactions"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.linkedinPostUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1400,
+        360
+      ],
+      "name": "LinkFinder AI - Scrape Post Reactions",
+      "notes": "Service: linkedin_post_to_reactions\\n\\nScrapes all people who reacted to a LinkedIn post.\\n\\nGet API key: https://linkfinderai.com\\n\\nReplace YOUR_API_KEY_HERE in Authorization header",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "q7r8s9t0",
+              "name": "errorMessage",
+              "value": "Invalid LinkedIn post URL. Please provide a valid post URL.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1400,
+        560
+      ],
+      "name": "❌ Invalid URL Error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "u1v2w3x4",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1620,
+        360
+      ],
+      "name": "✅ Check Scrape Success"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "y5z6a7b8",
+              "name": "errorMessage",
+              "value": "Failed to scrape post reactions. Please check the post URL and try again.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1840,
+        520
+      ],
+      "name": "❌ Scrape Failed Error"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "result",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3.4,
+      "position": [
+        1840,
+        260
+      ],
+      "name": "🔀 Split Engagers Array"
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2060,
+        260
+      ],
+      "name": "📦 Process in Batches (10 at a time)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.profile || $json.linkedinUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2280,
+        260
+      ],
+      "name": "LinkFinder AI - Enrich Profile",
+      "notes": "Service: linkedin_profile_to_linkedin_info\\n\\nFetches complete profile data including email, phone, job title, company info.\\n\\nGet API key: https://linkfinderai.com\\n\\nReplace YOUR_API_KEY_HERE in Authorization header",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c9d0e1f2",
+              "leftValue": "={{ $json.fullName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2500,
+        260
+      ],
+      "name": "✅ Profile Enriched Successfully"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": false,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "g3h4i5j6",
+              "leftValue": "={{ $json.jobTitle }}",
+              "rightValue": "={{ $('📝 Input: Post URL (Edit This)').item.json.jobTitleFilter.split(',').map(t => t.trim()) }}",
+              "operator": {
+                "type": "array",
+                "operation": "containsAny",
+                "singleValue": "={{ $json.jobTitle }}"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2720,
+        160
+      ],
+      "name": "🎯 Filter by Job Title (Optional)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "k7l8m9n0",
+              "name": "leadData",
+              "value": "={{ {\n  fullName: $json.fullName || 'N/A',\n  email: $json.email || 'Not available',\n  phone: $json.mobileNumber || 'Not available',\n  jobTitle: $json.jobTitle || 'N/A',\n  companyName: $json.companyName || 'N/A',\n  companyWebsite: $json.companyWebsite || 'N/A',\n  companyIndustry: $json.companyIndustry || 'N/A',\n  companySize: $json.companySize || 'N/A',\n  linkedinUrl: $json.linkedinUrl || 'N/A',\n  location: $json.addressWithCountry || 'N/A',\n  country: $json.addressCountryOnly || 'N/A',\n  headline: $json.headline || 'N/A',\n  connections: $json.connections || 'N/A',\n  followers: $json.followers || 'N/A',\n  isPremium: $json.isPremium || false,\n  isCurrentlyEmployed: $json.isCurrentlyEmployed || false,\n  profilePicture: $json.profilePic || 'N/A',\n  about: ($json.about || 'N/A').substring(0, 500),\n  companyLinkedin: $json.companyLinkedin || 'N/A',\n  enrichedDate: new Date().toISOString()\n} }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2940,
+        160
+      ],
+      "name": "📊 Format Lead Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "o1p2q3r4",
+              "name": "skipReason",
+              "value": "Does not match job title criteria",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2940,
+        340
+      ],
+      "name": "⏭️ Skip - Wrong Job Title"
+    },
+    {
+      "parameters": {
+        "mode": "remove",
+        "compare": "selectedFields",
+        "fieldsToCompare": {
+          "fields": [
+            {
+              "fieldName": "leadData.email"
+            },
+            {
+              "fieldName": "leadData.linkedinUrl"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 1.2,
+      "position": [
+        3160,
+        160
+      ],
+      "name": "🔄 Remove Duplicate Leads"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s5t6u7v8",
+              "name": "Full Name",
+              "value": "={{ $json.leadData.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "w9x0y1z2",
+              "name": "Email",
+              "value": "={{ $json.leadData.email }}",
+              "type": "string"
+            },
+            {
+              "id": "a3b4c5d6",
+              "name": "Phone",
+              "value": "={{ $json.leadData.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "e7f8g9h0",
+              "name": "Job Title",
+              "value": "={{ $json.leadData.jobTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "i1j2k3l4",
+              "name": "Company",
+              "value": "={{ $json.leadData.companyName }}",
+              "type": "string"
+            },
+            {
+              "id": "m5n6o7p8",
+              "name": "Company Website",
+              "value": "={{ $json.leadData.companyWebsite }}",
+              "type": "string"
+            },
+            {
+              "id": "q9r0s1t2",
+              "name": "Industry",
+              "value": "={{ $json.leadData.companyIndustry }}",
+              "type": "string"
+            },
+            {
+              "id": "u3v4w5x6",
+              "name": "Company Size",
+              "value": "={{ $json.leadData.companySize }}",
+              "type": "string"
+            },
+            {
+              "id": "y7z8a9b0",
+              "name": "LinkedIn URL",
+              "value": "={{ $json.leadData.linkedinUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "c1d2e3f4",
+              "name": "Location",
+              "value": "={{ $json.leadData.location }}",
+              "type": "string"
+            },
+            {
+              "id": "g5h6i7j8",
+              "name": "Country",
+              "value": "={{ $json.leadData.country }}",
+              "type": "string"
+            },
+            {
+              "id": "k9l0m1n2",
+              "name": "Headline",
+              "value": "={{ $json.leadData.headline }}",
+              "type": "string"
+            },
+            {
+              "id": "o3p4q5r6",
+              "name": "Connections",
+              "value": "={{ $json.leadData.connections }}",
+              "type": "string"
+            },
+            {
+              "id": "s7t8u9v0",
+              "name": "Premium Member",
+              "value": "={{ $json.leadData.isPremium }}",
+              "type": "boolean"
+            },
+            {
+              "id": "w1x2y3z4",
+              "name": "Currently Employed",
+              "value": "={{ $json.leadData.isCurrentlyEmployed }}",
+              "type": "boolean"
+            },
+            {
+              "id": "a5b6c7d8",
+              "name": "Profile Picture",
+              "value": "={{ $json.leadData.profilePicture }}",
+              "type": "string"
+            },
+            {
+              "id": "e9f0g1h2",
+              "name": "Company LinkedIn",
+              "value": "={{ $json.leadData.companyLinkedin }}",
+              "type": "string"
+            },
+            {
+              "id": "i3j4k5l6",
+              "name": "Enriched Date",
+              "value": "={{ $json.leadData.enrichedDate }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3380,
+        160
+      ],
+      "name": "📋 Prepare for Export"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Leads"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Email",
+            "LinkedIn URL"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3600,
+        160
+      ],
+      "name": "💾 Save to Google Sheets"
+    },
+    {
+      "parameters": {
+        "content": "## 🎯 Customize Filters\n\n**Edit job titles to target:**\n- Open \"📝 Input: Post URL\" node\n- Modify jobTitleFilter field\n- Separate titles with commas\n\n**Common filters:**\n- Executives: CEO,CTO,CFO,COO\n- Management: VP,Director,Manager\n- Technical: Engineer,Developer,Architect\n- Marketing: CMO,Marketing Director\n- Sales: Sales Director,VP Sales\n\n**To disable filtering:**\n- Leave jobTitleFilter empty\n- Or delete the filter node",
+        "height": 320,
+        "width": 300,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2700,
+        480
+      ],
+      "name": "💡 Filter Customization Tips"
+    }
+  ],
+  "connections": {
+    "▶️ Start - Click to Test": {
+      "main": [
+        [
+          {
+            "node": "📝 Input: Post URL (Edit This)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Input: Post URL (Edit This)": {
+      "main": [
+        [
+          {
+            "node": "🔍 Validate Post URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Validate Post URL": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Scrape Post Reactions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Invalid URL Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Scrape Post Reactions": {
+      "main": [
+        [
+          {
+            "node": "✅ Check Scrape Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ Check Scrape Success": {
+      "main": [
+        [
+          {
+            "node": "🔀 Split Engagers Array",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Scrape Failed Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Split Engagers Array": {
+      "main": [
+        [
+          {
+            "node": "📦 Process in Batches (10 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📦 Process in Batches (10 at a time)": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Enrich Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Enrich Profile": {
+      "main": [
+        [
+          {
+            "node": "✅ Profile Enriched Successfully",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ Profile Enriched Successfully": {
+      "main": [
+        [
+          {
+            "node": "🎯 Filter by Job Title (Optional)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📦 Process in Batches (10 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 Filter by Job Title (Optional)": {
+      "main": [
+        [
+          {
+            "node": "📊 Format Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "⏭️ Skip - Wrong Job Title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Format Lead Data": {
+      "main": [
+        [
+          {
+            "node": "🔄 Remove Duplicate Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⏭️ Skip - Wrong Job Title": {
+      "main": [
+        [
+          {
+            "node": "📦 Process in Batches (10 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Remove Duplicate Leads": {
+      "main": [
+        [
+          {
+            "node": "📋 Prepare for Export",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Prepare for Export": {
+      "main": [
+        [
+          {
+            "node": "💾 Save to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
+```
