@@ -1,0 +1,927 @@
+{
+  "name": "Competitor Sales Team Finder - Steal the Best Talent",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔍 About LinkFinder AI\n\nLinkFinder AI is a powerful tool to enrich leads and companies and scrape LinkedIn without needing a LinkedIn account.\n\n**Get your API key:** https://linkfinderai.com\n\n---\n\n## 📊 What This Workflow Does\n\nThis workflow helps you identify and extract contact information for sales professionals at your competitor companies. Perfect for recruitment, competitive intelligence, or understanding competitor sales structures.\n\n**Use Cases:**\n- Recruiting top sales talent from competitors\n- Building targeted lists for sales team benchmarking\n- Competitive intelligence on competitor sales organizations\n- Creating outreach lists for sales partnerships\n- Understanding competitor go-to-market strategies\n\n**Input Required:**\n- Names of 1-3 competitor companies (edit in the Input Data node)\n\n**Output Provided:**\n- Complete list of sales professionals at each company\n- Job titles and seniority levels\n- LinkedIn profile URLs\n- Contact information (email, phone when available)\n- Company information\n- Current employment status\n\n**Workflow Steps:**\n1. Input competitor company names\n2. Find LinkedIn company URLs for each competitor\n3. Extract all employees from each company's LinkedIn\n4. Filter for sales-related job titles (Sales, Account Executive, BDR, SDR, Account Manager, etc.)\n5. Enrich each sales professional's profile with full contact details\n6. Format and deduplicate the final list\n7. Output to Google Sheets or JSON\n\n---\n\n## ⚙️ Setup Instructions\n\n1. **Get LinkFinder AI API Key**\n   - Visit https://linkfinderai.com\n   - Sign up and copy your API key\n\n2. **Configure All LinkFinder AI Nodes**\n   - Find each node named \"LinkFinder AI - [Service]\"\n   - Open the node settings\n   - Expand the Headers section\n   - Find the Authorization header\n   - Replace YOUR_API_KEY_HERE with your actual API key\n   - Do this for ALL 4 LinkFinder AI nodes\n\n3. **Configure Input**\n   - Open the \"📝 Input: Competitor Companies\" node\n   - Edit the competitor company names\n   - Add up to 3 companies (or modify to add more)\n\n4. **Configure Output** (Optional)\n   - If using Google Sheets: Configure the Google Sheets node with your sheet ID\n   - If using JSON: The workflow will output JSON automatically\n\n5. **Test the Workflow**\n   - Click \"Test workflow\" button\n   - Wait for all nodes to complete (this may take 2-3 minutes)\n   - Verify sales professionals are found and enriched\n   - Check output data is correct\n\n6. **Activate**\n   - Once tested successfully, you can run it manually anytime\n   - Or set up a schedule trigger to run periodically\n\n---\n\n## 🔧 LinkFinder AI Services Used\n\n**company_name_to_linkedin_url** - Finds the official LinkedIn company page URL from a company name\n\n**linkedin_company_to_employees** - Extracts all employees from a LinkedIn company page\n\n**linkedin_profile_to_linkedin_info** - Enriches individual LinkedIn profiles with full contact information including email, phone, job details, and more\n\n---\n\n## 💡 Tips & Best Practices\n\n- Start with 1-2 companies to test, then scale up\n- Sales titles are filtered broadly to catch SDRs, BDRs, AEs, Account Managers, VPs, Directors, etc.\n- The workflow processes employees in batches to avoid rate limits\n- Results are deduplicated by LinkedIn URL to avoid duplicate entries\n- Consider scheduling this workflow to run weekly/monthly to track sales team changes\n- Export to Google Sheets for easy sharing and CRM import\n\n---\n\n## ⚠️ Important Notes\n\n- Rate limits: Processing large companies (500+ employees) may take several minutes\n- Data quality: LinkedIn data is generally highly accurate for current employment\n- Privacy: This data is publicly available on LinkedIn - use responsibly and comply with local laws\n- Email accuracy: Work emails are found when publicly available or can be inferred from company domains\n- Best for companies with 50-1000 employees for optimal results",
+        "height": 680,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        250,
+        240
+      ],
+      "name": "📖 Workflow Documentation"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        740,
+        460
+      ],
+      "name": "▶️ Start - Click to Find Competitor Sales Teams"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4",
+              "name": "competitors",
+              "value": "={{ [\n  {\"companyName\": \"Salesforce\"},\n  {\"companyName\": \"HubSpot\"},\n  {\"companyName\": \"Pipedrive\"}\n] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        460
+      ],
+      "name": "📝 Input: Competitor Companies (Edit These)"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        460
+      ],
+      "name": "🔀 Split Companies"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_linkedin_url"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.companyName }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1400,
+        460
+      ],
+      "name": "LinkFinder AI - Get Company LinkedIn URL",
+      "notes": "Service: company_name_to_linkedin_url\n\nFinds the LinkedIn company page URL from company name\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "e5f6g7h8",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "i9j0k1l2",
+              "leftValue": "={{ $json.result }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1620,
+        460
+      ],
+      "name": "✅ LinkedIn URL Found?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_company_to_employees"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.result }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1840,
+        360
+      ],
+      "name": "LinkFinder AI - Get All Employees",
+      "notes": "Service: linkedin_company_to_employees\n\nExtracts all employees from LinkedIn company page\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "m3n4o5p6",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "q7r8s9t0",
+              "leftValue": "={{ $json.result }}",
+              "rightValue": "",
+              "operator": {
+                "type": "any",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2060,
+        360
+      ],
+      "name": "✅ Employees Found?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "u1v2w3x4",
+              "name": "employees",
+              "value": "={{ $json.result }}",
+              "type": "array"
+            },
+            {
+              "id": "y5z6a7b8",
+              "name": "companyName",
+              "value": "={{ $('📝 Input: Competitor Companies (Edit These)').item.json.companyName }}",
+              "type": "string"
+            },
+            {
+              "id": "c9d0e1f2",
+              "name": "companyLinkedIn",
+              "value": "={{ $('LinkFinder AI - Get Company LinkedIn URL').item.json.result }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2280,
+        260
+      ],
+      "name": "📦 Package Employee Data"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "employees",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2500,
+        260
+      ],
+      "name": "🔀 Split Into Individual Employees"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": false,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "g3h4i5j6",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "sales|account executive|account manager|business development|BDR|SDR|sales development|sales rep|sales manager|director of sales|VP of sales|chief revenue|CRO|revenue|sales operations|sales engineer|solutions engineer|customer success manager|account director",
+              "operator": {
+                "type": "string",
+                "operation": "regex",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2720,
+        260
+      ],
+      "name": "🎯 Filter: Sales Titles Only"
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2940,
+        160
+      ],
+      "name": "🔄 Process in Batches (5 at a time)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.linkedinUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3160,
+        160
+      ],
+      "name": "LinkFinder AI - Enrich Sales Profile",
+      "notes": "Service: linkedin_profile_to_linkedin_info\n\nEnriches LinkedIn profile with full contact info\n\nGet API key: https://linkfinderai.com\n\nReplace YOUR_API_KEY_HERE in Authorization header",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "k7l8m9n0",
+              "leftValue": "={{ $json.fullName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3380,
+        160
+      ],
+      "name": "✅ Profile Enriched Successfully?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "o1p2q3r4",
+              "name": "competitorCompany",
+              "value": "={{ $('📦 Package Employee Data').item.json.companyName }}",
+              "type": "string"
+            },
+            {
+              "id": "s5t6u7v8",
+              "name": "competitorLinkedIn",
+              "value": "={{ $('📦 Package Employee Data').item.json.companyLinkedIn }}",
+              "type": "string"
+            },
+            {
+              "id": "w9x0y1z2",
+              "name": "fullName",
+              "value": "={{ $json.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "a3b4c5d6",
+              "name": "currentJobTitle",
+              "value": "={{ $json.jobTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "e7f8g9h0",
+              "name": "email",
+              "value": "={{ $json.email || 'Not available' }}",
+              "type": "string"
+            },
+            {
+              "id": "i1j2k3l4",
+              "name": "phone",
+              "value": "={{ $json.mobileNumber || 'Not available' }}",
+              "type": "string"
+            },
+            {
+              "id": "m5n6o7p8",
+              "name": "linkedinProfileUrl",
+              "value": "={{ $json.linkedinUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "q9r0s1t2",
+              "name": "location",
+              "value": "={{ $json.jobLocation || $json.addressWithCountry || 'Not available' }}",
+              "type": "string"
+            },
+            {
+              "id": "u3v4w5x6",
+              "name": "headline",
+              "value": "={{ $json.headline || 'Not available' }}",
+              "type": "string"
+            },
+            {
+              "id": "y7z8a9b0",
+              "name": "connections",
+              "value": "={{ $json.connections || 'Not available' }}",
+              "type": "string"
+            },
+            {
+              "id": "c1d2e3f4",
+              "name": "isPremium",
+              "value": "={{ $json.isPremium || false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "g5h6i7j8",
+              "name": "yearsOfExperience",
+              "value": "={{ $json.firstRoleYear ? new Date().getFullYear() - parseInt($json.firstRoleYear) : 'Unknown' }}",
+              "type": "string"
+            },
+            {
+              "id": "k9l0m1n2",
+              "name": "currentlyEmployed",
+              "value": "={{ $json.isCurrentlyEmployed || false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "o3p4q5r6",
+              "name": "profilePicture",
+              "value": "={{ $json.profilePic || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3600,
+        60
+      ],
+      "name": "📊 Format Sales Professional Data"
+    },
+    {
+      "parameters": {
+        "mode": "remove",
+        "compare": "selectedFields",
+        "fieldsToCompare": {
+          "fields": [
+            {
+              "fieldName": "linkedinProfileUrl"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 1.2,
+      "position": [
+        3820,
+        60
+      ],
+      "name": "🔄 Remove Duplicate Profiles"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s7t8u9v0",
+              "name": "totalSalesProfiles",
+              "value": "={{ $input.all().length }}",
+              "type": "number"
+            },
+            {
+              "id": "w1x2y3z4",
+              "name": "profilesWithEmail",
+              "value": "={{ $input.all().filter(item => item.json.email && item.json.email !== 'Not available').length }}",
+              "type": "number"
+            },
+            {
+              "id": "a5b6c7d8",
+              "name": "profilesWithPhone",
+              "value": "={{ $input.all().filter(item => item.json.phone && item.json.phone !== 'Not available').length }}",
+              "type": "number"
+            },
+            {
+              "id": "e9f0g1h2",
+              "name": "companies",
+              "value": "={{ [...new Set($input.all().map(item => item.json.competitorCompany))].join(', ') }}",
+              "type": "string"
+            },
+            {
+              "id": "i3j4k5l6",
+              "name": "salesProfiles",
+              "value": "={{ $input.all() }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4040,
+        60
+      ],
+      "name": "📈 Aggregate Results & Statistics"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split the salesProfiles array into individual items\nconst profiles = $input.first().json.salesProfiles;\n\nreturn profiles.map(profile => ({\n  json: profile.json\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4260,
+        60
+      ],
+      "name": "🔀 Split Results for Output"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m7n8o9p0",
+              "name": "message",
+              "value": "No employees found at this company or unable to access employee list",
+              "type": "string"
+            },
+            {
+              "id": "q1r2s3t4",
+              "name": "company",
+              "value": "={{ $('📝 Input: Competitor Companies (Edit These)').item.json.companyName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2280,
+        460
+      ],
+      "name": "⚠️ No Employees Found"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "u5v6w7x8",
+              "name": "message",
+              "value": "Could not find LinkedIn company page",
+              "type": "string"
+            },
+            {
+              "id": "y9z0a1b2",
+              "name": "company",
+              "value": "={{ $('📝 Input: Competitor Companies (Edit These)').item.json.companyName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1840,
+        560
+      ],
+      "name": "⚠️ Company Not Found"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c3d4e5f6",
+              "name": "message",
+              "value": "Profile enrichment failed or incomplete",
+              "type": "string"
+            },
+            {
+              "id": "g7h8i9j0",
+              "name": "linkedinUrl",
+              "value": "={{ $('LinkFinder AI - Enrich Sales Profile').item.json.input_data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3600,
+        260
+      ],
+      "name": "⚠️ Enrichment Failed"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "k1l2m3n4",
+              "name": "message",
+              "value": "No sales professionals found in employee list",
+              "type": "string"
+            },
+            {
+              "id": "o5p6q7r8",
+              "name": "company",
+              "value": "={{ $('📦 Package Employee Data').item.json.companyName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2940,
+        360
+      ],
+      "name": "⚠️ No Sales People Found"
+    },
+    {
+      "parameters": {
+        "content": "## 💡 Sales Title Filter\n\nThis node filters employees to find only sales professionals.\n\n**Included titles:**\n- Sales (any level)\n- Account Executive (AE)\n- Account Manager (AM)\n- Business Development (BDR/BDM)\n- Sales Development (SDR)\n- Sales Representative\n- Sales Manager\n- Director of Sales\n- VP of Sales\n- Chief Revenue Officer (CRO)\n- Revenue Operations\n- Sales Operations\n- Sales Engineer\n- Solutions Engineer\n- Customer Success Manager\n- Account Director\n\n**Case insensitive matching**",
+        "height": 380,
+        "width": 300,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2680,
+        540
+      ],
+      "name": "💡 Filter Info"
+    },
+    {
+      "parameters": {
+        "content": "## ⚙️ Batch Processing\n\nProcesses 5 profiles at a time to:\n- Avoid rate limits\n- Ensure stable API performance\n- Allow progress monitoring\n\nIncrease batch size if needed for faster processing (not recommended above 10)",
+        "height": 240,
+        "width": 280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2900,
+        440
+      ],
+      "name": "💡 Batch Info"
+    }
+  ],
+  "connections": {
+    "▶️ Start - Click to Find Competitor Sales Teams": {
+      "main": [
+        [
+          {
+            "node": "📝 Input: Competitor Companies (Edit These)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Input: Competitor Companies (Edit These)": {
+      "main": [
+        [
+          {
+            "node": "🔀 Split Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Split Companies": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Company LinkedIn URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Company LinkedIn URL": {
+      "main": [
+        [
+          {
+            "node": "✅ LinkedIn URL Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ LinkedIn URL Found?": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get All Employees",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "⚠️ Company Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get All Employees": {
+      "main": [
+        [
+          {
+            "node": "✅ Employees Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ Employees Found?": {
+      "main": [
+        [
+          {
+            "node": "📦 Package Employee Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "⚠️ No Employees Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📦 Package Employee Data": {
+      "main": [
+        [
+          {
+            "node": "🔀 Split Into Individual Employees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Split Into Individual Employees": {
+      "main": [
+        [
+          {
+            "node": "🎯 Filter: Sales Titles Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 Filter: Sales Titles Only": {
+      "main": [
+        [
+          {
+            "node": "🔄 Process in Batches (5 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "⚠️ No Sales People Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Process in Batches (5 at a time)": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Enrich Sales Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Enrich Sales Profile": {
+      "main": [
+        [
+          {
+            "node": "✅ Profile Enriched Successfully?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ Profile Enriched Successfully?": {
+      "main": [
+        [
+          {
+            "node": "📊 Format Sales Professional Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "⚠️ Enrichment Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Format Sales Professional Data": {
+      "main": [
+        [
+          {
+            "node": "🔄 Process in Batches (5 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Remove Duplicate Profiles": {
+      "main": [
+        [
+          {
+            "node": "📈 Aggregate Results & Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📈 Aggregate Results & Statistics": {
+      "main": [
+        [
+          {
+            "node": "🔀 Split Results for Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
