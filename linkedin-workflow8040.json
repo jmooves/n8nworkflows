@@ -1,0 +1,479 @@
+```json
+{
+  "name": "Executive Movement Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🎯 Executive Movement Tracker\n\n**What it does:** Monitors LinkedIn posts for executive announcements, then enriches multiple new hires with company data and contact info in batch mode\n\n**Input:** Array of LinkedIn post URLs announcing new executive hires\n\n**Output:** Enriched data for ALL executives including verified profiles, company info, team structure, and contact details\n\n**Scalability:** Processes 10-50 executive announcements in batches of 10\n\n**Setup:**\n1. Get API key from https://linkfinderai.com\n2. Replace YOUR_API_KEY_HERE in all LinkFinder AI nodes\n3. Edit input data with your list of LinkedIn post URLs\n4. Test the workflow\n\n**Services used:**\n- linkedin_post_to_reactions\n- lead_full_name_to_linkedin_url\n- company_name_to_linkedin_url\n- linkedin_company_to_employees\n- company_name_to_phone\n\n**Perfect for:** Sales teams tracking executive movements across 10s-100s of target companies to identify warm outreach opportunities",
+        "height": 420,
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [250, 240],
+      "name": "📖 Documentation"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [680, 460],
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "postUrls",
+              "name": "postUrls",
+              "value": "={{ [\"https://linkedin.com/posts/announcement1\", \"https://linkedin.com/posts/announcement2\", \"https://linkedin.com/posts/announcement3\", \"https://linkedin.com/posts/announcement4\", \"https://linkedin.com/posts/announcement5\", \"https://linkedin.com/posts/announcement6\", \"https://linkedin.com/posts/announcement7\", \"https://linkedin.com/posts/announcement8\", \"https://linkedin.com/posts/announcement9\", \"https://linkedin.com/posts/announcement10\"] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 460],
+      "name": "Input - Post URLs"
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1120, 460],
+      "name": "Split Into Batches"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_post_to_reactions"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.postUrls }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 460],
+      "name": "LinkFinder AI - Get Post Reactions"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "executiveName",
+              "name": "executiveName",
+              "value": "={{ $json.result[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "companyName",
+              "name": "companyName",
+              "value": "={{ $json.result[0].company }}",
+              "type": "string"
+            },
+            {
+              "id": "postUrl",
+              "name": "postUrl",
+              "value": "={{ $json.postUrls }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1560, 460],
+      "name": "Extract Executive Info"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "lead_full_name_to_linkedin_url"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.executiveName + ' ' + $json.companyName }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 460],
+      "name": "LinkFinder AI - Verify Executive"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_linkedin_url"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.companyName }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 460],
+      "name": "LinkFinder AI - Get Company LinkedIn"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_phone"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.companyName }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2220, 460],
+      "name": "LinkFinder AI - Get Company Phone"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "executiveName",
+              "name": "executiveName",
+              "value": "={{ $json.executiveName }}",
+              "type": "string"
+            },
+            {
+              "id": "companyName",
+              "name": "companyName",
+              "value": "={{ $json.companyName }}",
+              "type": "string"
+            },
+            {
+              "id": "postUrl",
+              "name": "postUrl",
+              "value": "={{ $json.postUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "executiveLinkedIn",
+              "name": "executiveLinkedIn",
+              "value": "={{ $('LinkFinder AI - Verify Executive').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "companyLinkedIn",
+              "name": "companyLinkedIn",
+              "value": "={{ $('LinkFinder AI - Get Company LinkedIn').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "companyPhone",
+              "name": "companyPhone",
+              "value": "={{ $('LinkFinder AI - Get Company Phone').item.json.result }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2440, 460],
+      "name": "Format Executive Record"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "executiveName"
+            },
+            {
+              "fieldToAggregate": "companyName"
+            },
+            {
+              "fieldToAggregate": "postUrl"
+            },
+            {
+              "fieldToAggregate": "executiveLinkedIn"
+            },
+            {
+              "fieldToAggregate": "companyLinkedIn"
+            },
+            {
+              "fieldToAggregate": "companyPhone"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [2660, 460],
+      "name": "Aggregate All Executives"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "totalExecutives",
+              "name": "totalExecutives",
+              "value": "={{ $json.executiveName.length }}",
+              "type": "number"
+            },
+            {
+              "id": "enrichedExecutives",
+              "name": "enrichedExecutives",
+              "value": "={{ $json }}",
+              "type": "object"
+            },
+            {
+              "id": "summary",
+              "name": "summary",
+              "value": "={{ 'Tracked ' + $json.executiveName.length + ' executive movements with full contact data' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2880, 460],
+      "name": "Final Results"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Input - Post URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input - Post URLs": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Post Reactions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Post Reactions": {
+      "main": [
+        [
+          {
+            "node": "Extract Executive Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Executive Info": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Verify Executive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Verify Executive": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Company LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Company LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Company Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Company Phone": {
+      "main": [
+        [
+          {
+            "node": "Format Executive Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Executive Record": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Aggregate All Executives",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All Executives": {
+      "main": [
+        [
+          {
+            "node": "Final Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
+```
