@@ -44,7 +44,7 @@
             },
             {
               "name": "Authorization",
-              "value": "Bearer 78Z4aZ4cZ76Z6fZ68Z61Z56Z6dZ69Z59Z5aZ71Z3aZ80Z6b"
+              "value": "Bearer API-KEY-HERE"
             }
           ]
         },
@@ -85,7 +85,7 @@
             },
             {
               "name": "Authorization",
-              "value": "Bearer 78Z4aZ4cZ76Z6fZ68Z61Z56Z6dZ69Z59Z5aZ71Z3aZ80Z6b"
+              "value": "Bearer API-KEY-HERE"
             }
           ]
         },
