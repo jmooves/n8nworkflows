@@ -11,11 +11,11 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        256,
-        -224
+        -2432,
+        416
       ],
       "name": "📖 Documentation",
-      "id": "789d6bb2-6dd2-4bcb-bf70-b7c3c029aac9"
+      "id": "48f3f717-0495-4594-a040-0ae8735e5572"
     },
     {
       "parameters": {
@@ -24,11 +24,11 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1136,
-        0
+        -1552,
+        640
       ],
       "name": "Split Into Batches",
-      "id": "be32f207-ac85-45ba-9f9d-d23a37546a00"
+      "id": "688b1fa0-d3f8-4a30-8d7c-6cdb934eaa7a"
     },
     {
       "parameters": {
@@ -65,11 +65,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1840,
-        16
+        -784,
+        640
       ],
       "name": "LinkFinder AI - Company Info",
-      "id": "fbfd06f2-5058-4326-a23a-b82c6ab4b1fe"
+      "id": "046e4e7f-4c91-46f5-aecd-17d9399cc18a"
     },
     {
       "parameters": {
@@ -97,7 +97,7 @@
             },
             {
               "name": "input_data",
-              "value": "={{ $json.linkedinUrl }}"
+              "value": "={{ $('LinkFinder AI - Company Info').item.json.linkedinUrl }}"
             }
           ]
         },
@@ -106,11 +106,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2096,
-        16
+        96,
+        640
       ],
       "name": "LinkFinder AI - Get Employees",
-      "id": "c87b2bbe-040d-43f3-9199-1a805f1d3599"
+      "id": "da42ce12-20ff-4d88-bde9-ec2f8b02318a"
     },
     {
       "parameters": {
@@ -120,11 +120,11 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        2688,
-        -640
+        0,
+        0
       ],
       "name": "Aggregate All Results",
-      "id": "4b3e99d0-1f15-417c-86cb-8afd6bb2eb1d"
+      "id": "07c1b024-e200-4660-a541-88166170831d"
     },
     {
       "parameters": {
@@ -161,11 +161,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1584,
-        16
+        -1040,
+        640
       ],
       "name": "LinkFinder AI - Find Company Linkedin Url",
-      "id": "43c353d3-cb3b-42e7-a715-6e9b31fc4228"
+      "id": "b5b00329-16da-46c4-ad87-eb9609290a3d"
     },
     {
       "parameters": {
@@ -224,10 +224,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2368,
-        16
+        368,
+        640
       ],
-      "id": "1b147930-7791-4daa-9d34-4fbb423b5884",
+      "id": "bc2d034d-53cf-4a7b-9ce3-fcae3f5f9da2",
       "name": "Filter for Decision makers",
       "alwaysOutputData": true
     },
@@ -288,6 +288,18 @@
               "name": "CEO linkedin url",
               "value": "={{ $json.linkedinUrl }}",
               "type": "string"
+            },
+            {
+              "id": "a8dd387d-1323-49b4-a44e-1b0d21315649",
+              "name": "Company email",
+              "value": "={{ $('LinkFinder AI - Find Company Email').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "4d6261e1-2b84-4454-9245-a1b9f9a59f35",
+              "name": "Company phone",
+              "value": "={{ $('LinkFinder AI - Find Company Phone').item.json.result }}",
+              "type": "string"
             }
           ]
         },
@@ -296,10 +308,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2624,
-        0
+        624,
+        624
       ],
-      "id": "5e7ecdd2-82d5-4089-a723-608148163733",
+      "id": "8726a89b-b99e-436f-a8a8-9d676f3a08d2",
       "name": "Merge format",
       "alwaysOutputData": true
     },
@@ -332,10 +344,10 @@
       "type": "n8n-nodes-base.googleSheetsTrigger",
       "typeVersion": 1,
       "position": [
-        784,
-        0
+        -1904,
+        640
       ],
-      "id": "4b4eb62e-4804-4f7e-ac2d-21619f0cf208",
+      "id": "373b582b-5a22-4bfb-984e-56c10cdb2696",
       "name": "Google Sheets Trigger",
       "credentials": {
         "googleSheetsTriggerOAuth2Api": {
@@ -343,6 +355,104 @@
           "name": "Google Sheets Trigger account"
         }
       }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 78Z4aZ4cZ76Z6fZ68Z61Z56Z6dZ69Z59Z5aZ71Z3aZ80Z6b"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_phone"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -480,
+        640
+      ],
+      "name": "LinkFinder AI - Find Company Phone",
+      "id": "3a040c45-83ee-4400-a7b7-82f8fb278f1a"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 78Z4aZ4cZ76Z6fZ68Z61Z56Z6dZ69Z59Z5aZ71Z3aZ80Z6b"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $('LinkFinder AI - Company Info').item.json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -192,
+        640
+      ],
+      "name": "LinkFinder AI - Find Company Email",
+      "id": "ed441f9f-3f5a-4f42-bb3d-7e275558c554"
+    },
+    {
+      "parameters": {
+        "content": "FIND YOUR API KEY FOR LINKFINDER AI : https://linkfinderai.com/\n\nAND replace api in each Linkfinder ai node",
+        "height": 244,
+        "width": 380,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        304
+      ],
+      "name": "📖 Documentation1",
+      "id": "013d557d-3966-4974-95a4-16d7dcd4f1fe"
     }
   ],
   "pinData": {},
@@ -369,7 +479,7 @@
       "main": [
         [
           {
-            "node": "LinkFinder AI - Get Employees",
+            "node": "LinkFinder AI - Find Company Phone",
             "type": "main",
             "index": 0
           }
@@ -385,11 +495,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Aggregate All Results": {
-      "main": [
-        []
       ]
     },
     "LinkFinder AI - Find Company Linkedin Url": {
@@ -435,17 +540,38 @@
           }
         ]
       ]
+    },
+    "LinkFinder AI - Find Company Phone": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Find Company Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Find Company Email": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Employees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "20a090d8-0a81-45c6-bc83-2ad3343d5197",
+  "versionId": "c6089453-3ea6-4eaa-b7d4-e7b17d254ff3",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "0ba15c473753d92c71f15fc9391d54bb141d91f940c0582da38b60426c3c2f10"
   },
-  "id": "lab4CgoORAV59bvl",
+  "id": "1bvCWOFAE5W93sec",
   "tags": []
 }
