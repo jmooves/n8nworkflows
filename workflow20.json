@@ -1,0 +1,514 @@
+{
+  "name": "LinkedIn Company Deep Dive - Org Chart Builder",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🏢 LinkedIn Company Deep Dive - Org Chart Builder\n\n**What it does:** Extracts complete company intelligence from LinkedIn - processes MULTIPLE company URLs to build full organizational profiles with leadership details.\n\n**Input:** Array of LinkedIn company URLs (e.g., 10-20 companies)\n\n**Output:** Complete org chart for EACH company including:\n- Company details (name, industry, size, website)\n- Employee count\n- Full employee roster\n- Leadership profiles with bios\n\n**Scalability:** Processes up to 20 companies in batches of 5, extracting 10+ employee profiles per company\n\n**Setup:**\n1. Get API key from https://linkfinderai.com\n2. Replace YOUR_API_KEY_HERE in all LinkFinder AI nodes (5 total)\n3. Edit input data with your company URLs\n4. Test the workflow\n\n**Services used:**\n- linkedin_company_to_linkedin_info\n- linkedin_company_to_employees\n- linkedin_profile_to_linkedin_info\n\n**Perfect for:**\n- Sales teams building account maps\n- Recruiters mapping organizations\n- Competitive intelligence\n- Market research on multiple companies",
+        "height": 420,
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        250,
+        240
+      ],
+      "name": "📖 Documentation"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        680,
+        460
+      ],
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "companies",
+              "name": "companies",
+              "value": "={{ [\"https://linkedin.com/company/tesla\", \"https://linkedin.com/company/microsoft\", \"https://linkedin.com/company/apple\", \"https://linkedin.com/company/google\", \"https://linkedin.com/company/amazon\"] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        900,
+        460
+      ],
+      "name": "Input - Company URLs"
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1120,
+        460
+      ],
+      "name": "Split Into Batches"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_company_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.companies }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1340,
+        460
+      ],
+      "name": "LinkFinder AI - Company Info"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_company_to_employees"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.companies }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        460
+      ],
+      "name": "LinkFinder AI - Get Employees"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "companyUrl",
+              "name": "companyUrl",
+              "value": "={{ $('Input - Company URLs').item.json.companies }}",
+              "type": "string"
+            },
+            {
+              "id": "companyName",
+              "name": "companyName",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "industry",
+              "name": "industry",
+              "value": "={{ $json.industry }}",
+              "type": "string"
+            },
+            {
+              "id": "companySize",
+              "name": "companySize",
+              "value": "={{ $json.size }}",
+              "type": "string"
+            },
+            {
+              "id": "website",
+              "name": "website",
+              "value": "={{ $json.website }}",
+              "type": "string"
+            },
+            {
+              "id": "employees",
+              "name": "employees",
+              "value": "={{ $('LinkFinder AI - Get Employees').item.json.result.slice(0, 10) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1780,
+        460
+      ],
+      "name": "Merge Company Data"
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2000,
+        460
+      ],
+      "name": "Split Employees"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.employees }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2220,
+        460
+      ],
+      "name": "LinkFinder AI - Employee Profile"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "employeeName",
+              "name": "employeeName",
+              "value": "={{ $json.fullName }}",
+              "type": "string"
+            },
+            {
+              "id": "jobTitle",
+              "name": "jobTitle",
+              "value": "={{ $json.jobTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "phoneNumber",
+              "name": "phoneNumber",
+              "value": "={{ $json.phoneNumber }}",
+              "type": "string"
+            },
+            {
+              "id": "linkedinUrl",
+              "name": "linkedinUrl",
+              "value": "={{ $json.linkedinUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2440,
+        460
+      ],
+      "name": "Format Employee Data"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "companyUrl"
+            },
+            {
+              "fieldToAggregate": "companyName"
+            },
+            {
+              "fieldToAggregate": "industry"
+            },
+            {
+              "fieldToAggregate": "companySize"
+            },
+            {
+              "fieldToAggregate": "website"
+            },
+            {
+              "fieldToAggregate": "employeeName"
+            },
+            {
+              "fieldToAggregate": "jobTitle"
+            },
+            {
+              "fieldToAggregate": "email"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        460
+      ],
+      "name": "Aggregate All Results"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "totalCompanies",
+              "name": "totalCompanies",
+              "value": "={{ $json.companyName.length }}",
+              "type": "number"
+            },
+            {
+              "id": "totalEmployees",
+              "name": "totalEmployees",
+              "value": "={{ $json.employeeName.length }}",
+              "type": "number"
+            },
+            {
+              "id": "orgChartData",
+              "name": "orgChartData",
+              "value": "={{ $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3100,
+        460
+      ],
+      "name": "Final Org Chart"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Input - Company URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input - Company URLs": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Company Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Company Info": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Employees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Employees": {
+      "main": [
+        [
+          {
+            "node": "Merge Company Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Company Data": {
+      "main": [
+        [
+          {
+            "node": "Split Employees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Employees": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Employee Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Employee Profile": {
+      "main": [
+        [
+          {
+            "node": "Format Employee Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Employee Data": {
+      "main": [
+        [
+          {
+            "node": "Split Employees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Employees": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Aggregate All Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All Results": {
+      "main": [
+        [
+          {
+            "node": "Final Org Chart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
