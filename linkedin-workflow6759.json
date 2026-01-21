@@ -1,0 +1,163 @@
+{
+  "name": "Competitor Employee Database Builder",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [680, 460],
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "content": "## 🔍 Competitor Employee Database Builder\n\n**What it does:** Builds a complete enriched database of ALL employees from any company using their LinkedIn company page\n\n**Input:** Array of company names (processes MULTIPLE companies)\n\n**Output:** Enriched employee data for ALL employees from ALL companies\n\n**Scalability:** Processes multiple companies, each with 10-500+ employees in batches of 10\n\n**Setup:**\n1. Get API key from https://linkfinderai.com\n2. Replace YOUR_API_KEY_HERE in all LinkFinder AI nodes\n3. Edit input data with your company list\n4. Connect Google Sheets or export option\n5. Test with 1-2 companies first\n\n**Services used:**\n- company_name_to_linkedin_url\n- linkedin_company_to_employees\n- linkedin_profile_to_linkedin_info\n\n**Perfect for:**\n- Building competitor intel databases\n- Talent mapping across multiple companies\n- Market research on 10+ companies\n- Sales prospecting at scale",
+        "height": 420,
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [250, 240],
+      "name": "📖 Documentation"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "companies",
+              "name": "companies",
+              "value": "={{ [\"Salesforce\", \"HubSpot\", \"Zoom\", \"Slack\", \"Atlassian\", \"Dropbox\", \"Monday.com\", \"Asana\", \"Zendesk\", \"Intercom\"] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 460],
+      "name": "Input - Company List"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1120, 460],
+      "name": "Split Companies"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_linkedin_url"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.companies }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 460],
+      "name": "LinkFinder AI - Get LinkedIn URL"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_company_to_employees"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.result }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 460],
+      "name": "LinkFinder AI - Get Employees"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "company_name",
+              "name": "company_name",
+              "value": "={{ $('Input - Company List').item.json.companies }}",
+              "type": "string"
+            },
+            {
+              "id": "company_linkedin",
+              "name": "company_linkedin",
+              "value": "={{ $('LinkFinder AI - Get LinkedIn URL').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "employees",
+              "name": "employees",
+              "value": "={{ $json.result }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1780, 460],
+      "name": "Extract Employee URLs"
+    },
+    {
+      "parameters": {
+        "b
