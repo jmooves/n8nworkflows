@@ -1,0 +1,671 @@
+{
+  "name": "CRM Database Cleanup - Multi-Contact Enrichment",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔍 CRM Database Cleanup Workflow\n\n**What it does:** Processes MULTIPLE stale CRM contacts (500+) and enriches each with fresh LinkedIn + company data\n\n**Input:** Array of contacts from CRM (firstname, lastname, company, existing data)\n\n**Output:** Fully enriched contact records with LinkedIn profiles, company websites, phones, and emails\n\n**Scalability:** Processes contacts in batches of 10, handles 500+ records per execution\n\n**Setup:**\n1. Get API key from https://linkfinderai.com\n2. Replace YOUR_API_KEY_HERE in all LinkFinder AI nodes\n3. Configure your CRM credentials\n4. Set up Google Sheets for logging\n5. Test with small batch first\n\n**Services used:**\n- lead_full_name_to_linkedin_url\n- linkedin_profile_to_linkedin_info\n- company_name_to_website\n- company_name_to_phone\n- company_name_to_email\n\n**Perfect for:** Sales teams cleaning 100s of outdated CRM records, enriching lead lists at scale, maintaining data quality across large databases\n\n**Processing time:** ~30-60 minutes for 500 contacts (rate limited for API stability)",
+        "height": 480,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        250,
+        240
+      ],
+      "name": "📖 Documentation"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        680,
+        460
+      ],
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "contacts",
+              "name": "contacts",
+              "value": "={{ [\n  {id: \"001\", firstname: \"Sarah\", lastname: \"Johnson\", company: \"Acme Corp\", email: \"old@email.com\", phone: \"\", linkedinbio: \"\"},\n  {id: \"002\", firstname: \"Michael\", lastname: \"Chen\", company: \"Tech Innovations Inc\", email: \"m.chen@old.com\", phone: \"+1-555-0100\", linkedinbio: \"\"},\n  {id: \"003\", firstname: \"Emily\", lastname: \"Rodriguez\", company: \"Global Solutions\", email: \"\", phone: \"\", linkedinbio: \"https://linkedin.com/in/emily-r\"},\n  {id: \"004\", firstname: \"David\", lastname: \"Park\", company: \"DataTech Systems\", email: \"dpark@company.com\", phone: \"\", linkedinbio: \"\"},\n  {id: \"005\", firstname: \"Jessica\", lastname: \"Williams\", company: \"Enterprise Software LLC\", email: \"\", phone: \"+1-555-0105\", linkedinbio: \"\"},\n  {id: \"006\", firstname: \"Robert\", lastname: \"Martinez\", company: \"Cloud Services\", email: \"robert@old.com\", phone: \"\", linkedinbio: \"\"},\n  {id: \"007\", firstname: \"Amanda\", lastname: \"Taylor\", company: \"Digital Marketing Group\", email: \"\", phone: \"\", linkedinbio: \"\"},\n  {id: \"008\", firstname: \"James\", lastname: \"Anderson\", company: \"Financial Solutions\", email: \"j.anderson@email.com\", phone: \"+1-555-0108\", linkedinbio: \"\"},\n  {id: \"009\", firstname: \"Maria\", lastname: \"Garcia\", company: \"Healthcare Innovations\", email: \"\", phone: \"\", linkedinbio: \"\"},\n  {id: \"010\", firstname: \"Chris\", lastname: \"Lee\", company: \"Manufacturing Tech\", email: \"clee@company.com\", phone: \"\", linkedinbio: \"\"}\n] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        900,
+        460
+      ],
+      "name": "Input - CRM Contact List"
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1120,
+        460
+      ],
+      "name": "Split Into Batches"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "crm_id",
+              "name": "crm_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "first_name",
+              "name": "first_name",
+              "value": "={{ $json.firstname }}",
+              "type": "string"
+            },
+            {
+              "id": "last_name",
+              "name": "last_name",
+              "value": "={{ $json.lastname }}",
+              "type": "string"
+            },
+            {
+              "id": "full_name",
+              "name": "full_name",
+              "value": "={{ $json.firstname }} {{ $json.lastname }}",
+              "type": "string"
+            },
+            {
+              "id": "company",
+              "name": "company",
+              "value": "={{ $json.company }}",
+              "type": "string"
+            },
+            {
+              "id": "current_email",
+              "name": "current_email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "current_phone",
+              "name": "current_phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "current_linkedin",
+              "name": "current_linkedin",
+              "value": "={{ $json.linkedinbio }}",
+              "type": "string"
+            },
+            {
+              "id": "company_clean",
+              "name": "company_clean",
+              "value": "={{ $json.company.replace(/\\s+(Inc\\.|LLC|Ltd\\.)$/gi, '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1340,
+        460
+      ],
+      "name": "Prepare Contact Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "lead_full_name_to_linkedin_url"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.full_name }} {{ $json.company }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        460
+      ],
+      "name": "LinkFinder AI - Get LinkedIn URL"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $('LinkFinder AI - Get LinkedIn URL').item.json.result || $('Prepare Contact Data').item.json.current_linkedin }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1780,
+        460
+      ],
+      "name": "LinkFinder AI - Scrape Profile"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_website"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $('Prepare Contact Data').item.json.company_clean }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2000,
+        460
+      ],
+      "name": "LinkFinder AI - Company Website"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_phone"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $('Prepare Contact Data').item.json.company_clean }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2220,
+        460
+      ],
+      "name": "LinkFinder AI - Company Phone"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $('Prepare Contact Data').item.json.company_clean }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2440,
+        460
+      ],
+      "name": "LinkFinder AI - Company Email"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "crm_id",
+              "name": "crm_id",
+              "value": "={{ $('Prepare Contact Data').item.json.crm_id }}",
+              "type": "string"
+            },
+            {
+              "id": "first_name",
+              "name": "first_name",
+              "value": "={{ $('Prepare Contact Data').item.json.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "last_name",
+              "name": "last_name",
+              "value": "={{ $('Prepare Contact Data').item.json.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "company",
+              "name": "company",
+              "value": "={{ $('Prepare Contact Data').item.json.company }}",
+              "type": "string"
+            },
+            {
+              "id": "old_linkedin",
+              "name": "old_linkedin",
+              "value": "={{ $('Prepare Contact Data').item.json.current_linkedin }}",
+              "type": "string"
+            },
+            {
+              "id": "new_linkedin",
+              "name": "new_linkedin",
+              "value": "={{ $('LinkFinder AI - Get LinkedIn URL').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "job_title",
+              "name": "job_title",
+              "value": "={{ $('LinkFinder AI - Scrape Profile').item.json.jobTitle || $('LinkFinder AI - Scrape Profile').item.json.headline }}",
+              "type": "string"
+            },
+            {
+              "id": "company_website",
+              "name": "company_website",
+              "value": "={{ $('LinkFinder AI - Company Website').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "company_phone",
+              "name": "company_phone",
+              "value": "={{ $('LinkFinder AI - Company Phone').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "company_email",
+              "name": "company_email",
+              "value": "={{ $('LinkFinder AI - Company Email').item.json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "enriched_at",
+              "name": "enriched_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2660,
+        460
+      ],
+      "name": "Merge All Results"
+    },
+    {
+      "parameters": {
+        "amount": 500,
+        "unit": "milliseconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2880,
+        460
+      ],
+      "name": "Rate Limit Delay"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "crm_id"
+            },
+            {
+              "fieldToAggregate": "first_name"
+            },
+            {
+              "fieldToAggregate": "last_name"
+            },
+            {
+              "fieldToAggregate": "company"
+            },
+            {
+              "fieldToAggregate": "new_linkedin"
+            },
+            {
+              "fieldToAggregate": "job_title"
+            },
+            {
+              "fieldToAggregate": "company_website"
+            },
+            {
+              "fieldToAggregate": "company_phone"
+            },
+            {
+              "fieldToAggregate": "company_email"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        3100,
+        460
+      ],
+      "name": "Aggregate All Enriched Contacts"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "total_processed",
+              "name": "total_processed",
+              "value": "={{ $json.crm_id.length }}",
+              "type": "number"
+            },
+            {
+              "id": "enriched_data",
+              "name": "enriched_data",
+              "value": "={{ $json }}",
+              "type": "object"
+            },
+            {
+              "id": "completion_time",
+              "name": "completion_time",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "summary",
+              "name": "summary",
+              "value": "={{ 'Successfully enriched ' + $json.crm_id.length + ' contacts with LinkedIn profiles, company websites, phones, and emails' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3320,
+        460
+      ],
+      "name": "Final Results Summary"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Input - CRM Contact List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input - CRM Contact List": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "Prepare Contact Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Contact Data": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get LinkedIn URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get LinkedIn URL": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Scrape Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Scrape Profile": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Company Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Company Website": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Company Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Company Phone": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Company Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Company Email": {
+      "main": [
+        [
+          {
+            "node": "Merge All Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Results": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit Delay": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Aggregate All Enriched Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All Enriched Contacts": {
+      "main": [
+        [
+          {
+            "node": "Final Results Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
