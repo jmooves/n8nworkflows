@@ -1,0 +1,564 @@
+{
+  "name": "Affiliate Recruiter - Influencer Discovery & Enrichment",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🎯 Affiliate Recruiter - Influencer Discovery & Enrichment\n\n**What it does:** Discovers potential affiliate partners from LinkedIn post engagements, enriches their profiles with full contact data, scores them by influence, and prepares them for outreach.\n\n**Input:** LinkedIn post URL (viral content in your niche)\n\n**Output:** Fully enriched influencer database with scores, emails, and priority rankings\n\n**Scalability:** Processes 50-200+ profiles per post automatically\n\n**Setup:**\n1. Get API key from https://linkfinderai.com\n2. Replace YOUR_API_KEY_HERE in all LinkFinder AI nodes\n3. Connect your Google Sheets\n4. Paste a LinkedIn post URL and run\n\n**Services used:**\n- linkedin_post_to_reactions\n- linkedin_profile_to_linkedin_info\n- company_name_to_website\n- company_name_to_email\n\n**Perfect for:** Affiliate managers, partnership teams, influencer marketing agencies recruiting at scale",
+        "height": 520,
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "name": "📖 Documentation",
+      "id": "7be25293-1c3f-4fa4-963c-aaada826b15c"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        432,
+        224
+      ],
+      "name": "Manual Trigger",
+      "id": "91829fee-2fea-4c1c-a640-87650bd7c9de"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "post_url",
+              "name": "post_url",
+              "value": "https://www.linkedin.com/posts/michael-forte_one-of-the-best-and-worst-things-to-happen-share-7421553159229108224-j4ed?utm_source=share&utm_medium=member_desktop&rcm=ACoAADdQBmEBwach35t8SjXnzJVVSNKsvp9cVXc",
+              "type": "string"
+            },
+            {
+              "id": "min_followers",
+              "name": "min_followers",
+              "value": 5000,
+              "type": "number"
+            },
+            {
+              "id": "target_keywords",
+              "name": "target_keywords",
+              "value": "=[\"creator\", \"influencer\", \"consultant\", \"coach\", \"founder\", \"entrepreneur\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        224
+      ],
+      "name": "Input - Post URL & Settings",
+      "id": "fac75720-6d62-4433-9ae3-50ddbb3c8750"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 78Z4aZ4cZ76Z6fZ68Z61Z56Z6dZ69Z59Z5aZ71Z3aZ80Z6b"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_post_to_reactions"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.post_url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        224
+      ],
+      "name": "LinkFinder AI - Get Post Reactions",
+      "id": "7ba3054d-0ba9-4682-b982-22c603a82ea6"
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1248,
+        224
+      ],
+      "name": "Split Into Batches",
+      "id": "b58fe949-4a8f-4a81-bb8e-5c5707a7c9d0"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 78Z4aZ4cZ76Z6fZ68Z61Z56Z6dZ69Z59Z5aZ71Z3aZ80Z6b"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.link }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1632,
+        208
+      ],
+      "name": "LinkFinder AI - Get Profile Info",
+      "id": "f74ade43-f415-41b3-bb72-1391b0952016"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "filter-followers",
+              "leftValue": "={{ $json.follower_count }}",
+              "rightValue": 1000,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2080,
+        208
+      ],
+      "name": "Filter - Min Followers",
+      "id": "ef0ba1fe-75eb-4f8d-8377-86f885e5c468"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 78Z4aZ4cZ76Z6fZ68Z61Z56Z6dZ69Z59Z5aZ71Z3aZ80Z6b"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.current_company }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2352,
+        208
+      ],
+      "name": "LinkFinder AI - Get Company Email",
+      "id": "89c62136-ad85-40a7-b14e-919e6339daef"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "all_profiles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        3744,
+        224
+      ],
+      "name": "Aggregate All Results",
+      "id": "05adf87d-9a40-49d5-886a-7443685517b7"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Final summary and sorted results\nconst allProfiles = $input.first().json.all_profiles || [];\n\n// Sort by influence score (highest first)\nconst sorted = allProfiles.sort((a, b) => (b.influence_score || 0) - (a.influence_score || 0));\n\n// Count by priority\nconst highPriority = sorted.filter(p => p.priority === 'high').length;\nconst mediumPriority = sorted.filter(p => p.priority === 'medium').length;\nconst lowPriority = sorted.filter(p => p.priority === 'low').length;\n\n// Get top 10 for immediate outreach\nconst topProspects = sorted.slice(0, 10);\n\nreturn [{\n  json: {\n    summary: {\n      total_profiles_processed: sorted.length,\n      high_priority_count: highPriority,\n      medium_priority_count: mediumPriority,\n      low_priority_count: lowPriority,\n      profiles_with_email: sorted.filter(p => p.company_email || p.direct_email).length,\n      average_influence_score: Math.round(sorted.reduce((sum, p) => sum + (p.influence_score || 0), 0) / sorted.length)\n    },\n    top_10_prospects: topProspects,\n    all_enriched_profiles: sorted,\n    ready_for_outreach: sorted.filter(p => p.priority === 'high' && (p.company_email || p.direct_email))\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3952,
+        224
+      ],
+      "name": "Generate Final Report",
+      "id": "2c2f9e5a-a965-48a8-bf3c-b9d2c49b6543"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Parse profile data and calculate influence score\nconst profile = $json;\n\nconst fullName = profile.fullName || profile.full_name || profile.name || 'Unknown';\nconst headline = profile.headline || '';\nconst summary = profile.summary || '';\nconst followerCount = parseInt(profile.followers || profile.followerCount || profile.follower_count || 0);\nconst connectionCount = parseInt(profile.connections || profile.connectionCount || profile.connection_count || 0);\nconst currentCompany = profile.company || profile.companyName || profile.current_company || '';\nconst location = profile.location || '';\nconst email = profile.email || '';\n\n// Calculate influence score (0-100)\nlet score = 0;\n\n// Follower score (0-50 points)\nif (followerCount >= 50000) score += 50;\nelse if (followerCount >= 20000) score += 40;\nelse if (followerCount >= 10000) score += 30;\nelse if (followerCount >= 5000) score += 20;\nelse if (followerCount >= 1000) score += 10;\n\n// Connection score (0-25 points)\nif (connectionCount >= 10000) score += 25;\nelse if (connectionCount >= 5000) score += 20;\nelse if (connectionCount >= 2000) score += 15;\nelse if (connectionCount >= 500) score += 10;\n\n// Headline relevance (0-25 points)\nconst headlineLower = headline.toLowerCase();\nconst keywords = ['creator', 'influencer', 'consultant', 'coach', 'founder', 'entrepreneur', 'speaker', 'author'];\nconst matchCount = keywords.filter(kw => headlineLower.includes(kw)).length;\nscore += Math.min(matchCount * 8, 25);\n\n// Determine priority\nlet priority = 'low';\nif (score >= 70) priority = 'high';\nelse if (score >= 45) priority = 'medium';\n\nreturn {\n  json: {\n    name: fullName,\n    linkedin_url: profile.linkedinUrl || profile.linkedin_url || '',\n    headline: headline,\n    summary: summary.substring(0, 200),\n    follower_count: followerCount,\n    connection_count: connectionCount,\n    current_company: currentCompany,\n    location: location,\n    direct_email: email,\n    reaction_type: profile.reaction_type || '',\n    influence_score: score,\n    priority: priority,\n    needs_company_enrichment: currentCompany ? true : false\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1856,
+        208
+      ],
+      "name": "Parse & Score Profile",
+      "id": "61976228-9254-442a-8aa2-629f5ae1d1cd"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LnFEuULxVPWNCyHE_L7InAb_xa14IuuFAfNMFQ69U_U",
+          "mode": "list",
+          "cachedResultName": "Affiliate Influencers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LnFEuULxVPWNCyHE_L7InAb_xa14IuuFAfNMFQ69U_U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LnFEuULxVPWNCyHE_L7InAb_xa14IuuFAfNMFQ69U_U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $('LinkFinder AI - Get Profile Info').item.json.name }}",
+            "company_email": "={{ $json.result }}",
+            "email": "={{ $('LinkFinder AI - Get Profile Info').item.json.email }}",
+            "job": "={{ $('LinkFinder AI - Get Profile Info').item.json.jobTitle }}",
+            "website": "={{ $('LinkFinder AI - Get Profile Info').item.json.website }}",
+            "company": "={{ $('LinkFinder AI - Get Profile Info').item.json.company }}",
+            "linkedin url": "={{ $('LinkFinder AI - Get Profile Info').item.json.linkedinUrl }}",
+            "location": "={{ $('LinkFinder AI - Get Profile Info').item.json.location }}",
+            "company_size": "={{ $('LinkFinder AI - Get Profile Info').item.json.company_size }}",
+            "company_linkedin ": "={{ $('LinkFinder AI - Get Profile Info').item.json.company_linkedin_url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "job",
+              "displayName": "job",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linkedin url",
+              "displayName": "linkedin url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company_email",
+              "displayName": "company_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company_size",
+              "displayName": "company_size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company_linkedin ",
+              "displayName": "company_linkedin ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2688,
+        304
+      ],
+      "id": "368d93ed-fa27-4dfc-b00b-ca36cc25c9e8",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "o8l5meOpqkwP3c5u",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Manual Trigger": [
+      {
+        "json": {}
+      }
+    ]
+  },
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Input - Post URL & Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input - Post URL & Settings": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Post Reactions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Post Reactions": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [],
+        [
+          {
+            "node": "LinkFinder AI - Get Profile Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Profile Info": {
+      "main": [
+        [
+          {
+            "node": "Parse & Score Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter - Min Followers": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Company Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Company Email": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All Results": {
+      "main": [
+        [
+          {
+            "node": "Generate Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Score Profile": {
+      "main": [
+        [
+          {
+            "node": "Filter - Min Followers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8e8b088c-1907-4e78-ad23-52851df32f07",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0ba15c473753d92c71f15fc9391d54bb141d91f940c0582da38b60426c3c2f10"
+  },
+  "id": "JNON4tJIXyPz3IUg",
+  "tags": []
+}
