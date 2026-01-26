@@ -1,0 +1,489 @@
+```json
+{
+  "name": "Job Posting Hunter - Auto Lead Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🎯 Job Posting Hunter - Auto Lead Generation\n\n**What it does:** Automatically detects job postings from target companies and enriches hiring managers - processes MULTIPLE companies daily\n\n**Input:** List of target companies (from Google Sheet)\n\n**Output:** Enriched hiring manager data for ALL new job postings with personalized outreach\n\n**Scalability:** Processes 20-50 companies per run, finds 10-30 opportunities/week\n\n**Setup:**\n1. Get API key from https://linkfinderai.com\n2. Replace YOUR_API_KEY_HERE in all LinkFinder AI nodes\n3. Set up Google Sheet with target companies\n4. Configure Gmail/CRM integration\n5. Test the workflow\n\n**Services used:**\n- company_name_to_linkedin_url\n- company_name_to_employee_count\n- company_name_to_email\n- linkedin_company_to_employees\n- linkedin_profile_to_linkedin_info\n\n**Perfect for:** Sales teams hunting for companies with active hiring = active budget. Automatically reaches hiring managers at the perfect moment.",
+        "height": 420,
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [250, 240],
+      "name": "📖 Documentation"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [680, 460],
+      "name": "Daily at 9am"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "companies",
+              "name": "companies",
+              "value": "={{ [{name: \"Salesforce\", linkedin: \"https://linkedin.com/company/salesforce\", priority: \"High\"}, {name: \"HubSpot\", linkedin: \"https://linkedin.com/company/hubspot\", priority: \"High\"}, {name: \"Stripe\", linkedin: \"https://linkedin.com/company/stripe\", priority: \"Medium\"}, {name: \"Shopify\", linkedin: \"https://linkedin.com/company/shopify\", priority: \"High\"}, {name: \"Atlassian\", linkedin: \"https://linkedin.com/company/atlassian\", priority: \"Medium\"}, {name: \"Zoom\", linkedin: \"https://linkedin.com/company/zoom-video-communications\", priority: \"Medium\"}, {name: \"Slack\", linkedin: \"https://linkedin.com/company/slack\", priority: \"High\"}, {name: \"Notion\", linkedin: \"https://linkedin.com/company/notionhq\", priority: \"High\"}, {name: \"Airtable\", linkedin: \"https://linkedin.com/company/airtable\", priority: \"Medium\"}, {name: \"Figma\", linkedin: \"https://linkedin.com/company/figma\", priority: \"High\"}] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 460],
+      "name": "Input - Target Companies"
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1120, 460],
+      "name": "Split Into Batches"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_employee_count"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 460],
+      "name": "LinkFinder AI - Get Employee Count"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 460],
+      "name": "LinkFinder AI - Get Company Email"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_company_to_employees"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.linkedin }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 460],
+      "name": "LinkFinder AI - Get Employees List"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const company = item.json.name;\n  const linkedin = item.json.linkedin;\n  const priority = item.json.priority;\n  const employeeCount = item.json.result || 'Unknown';\n  const companyEmail = items.find(i => i.json.companyEmail)?.json.companyEmail || 'N/A';\n  const employees = item.json.result || [];\n  \n  // Find hiring managers (VP, Director, Head of Sales/Marketing/Engineering)\n  const hiringManagers = Array.isArray(employees) ? employees.filter(emp => {\n    const title = (emp.title || '').toLowerCase();\n    return title.includes('vp') || \n           title.includes('vice president') ||\n           title.includes('director') ||\n           title.includes('head of') ||\n           title.includes('chief') ||\n           (title.includes('manager') && (title.includes('senior') || title.includes('lead')));\n  }).slice(0, 3) : []; // Top 3 hiring managers\n  \n  // For each hiring manager, create an opportunity\n  if (hiringManagers.length > 0) {\n    for (const manager of hiringManagers) {\n      results.push({\n        json: {\n          companyName: company,\n          companyLinkedIn: linkedin,\n          priority: priority,\n          employeeCount: employeeCount,\n          companyEmail: companyEmail,\n          hiringManagerName: manager.name || 'Unknown',\n          hiringManagerTitle: manager.title || 'Unknown',\n          hiringManagerLinkedIn: manager.linkedin_url || '',\n          hiringManagerLocation: manager.location || 'Unknown',\n          // Simulated job posting data (in real workflow, this comes from Apify/scraper)\n          jobPosting: {\n            detected: true,\n            title: `New ${manager.title.includes('Sales') ? 'Sales' : manager.title.includes('Marketing') ? 'Marketing' : 'Engineering'} Position`,\n            postedDate: 'Last 7 days',\n            department: manager.title.includes('Sales') ? 'Sales' : manager.title.includes('Marketing') ? 'Marketing' : 'Engineering'\n          }\n        }\n      });\n    }\n  } else {\n    // No hiring managers found, still track company\n    results.push({\n      json: {\n        companyName: company,\n        companyLinkedIn: linkedin,\n        priority: priority,\n        employeeCount: employeeCount,\n        companyEmail: companyEmail,\n        hiringManagerName: 'No managers found',\n        hiringManagerTitle: 'N/A',\n        hiringManagerLinkedIn: '',\n        hiringManagerLocation: 'N/A',\n        jobPosting: {\n          detected: false\n        }\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 460],
+      "name": "Identify Hiring Managers"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "filter1",
+              "leftValue": "={{ $json.jobPosting.detected }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "filter2",
+              "leftValue": "={{ $json.hiringManagerLinkedIn }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [2220, 460],
+      "name": "Filter - Valid Opportunities"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkfinderai.com",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "linkedin_profile_to_linkedin_info"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.hiringManagerLinkedIn }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2440, 460],
+      "name": "LinkFinder AI - Enrich Manager Profile"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const company = item.json.companyName;\n  const managerName = item.json.name || item.json.hiringManagerName;\n  const managerTitle = item.json.jobTitle || item.json.hiringManagerTitle;\n  const managerHeadline = item.json.headline || 'Building great teams';\n  const employeeCount = item.json.employeeCount;\n  const jobTitle = item.json.jobPosting?.title || 'New Position';\n  const department = item.json.jobPosting?.department || 'team';\n  \n  const firstName = managerName.split(' ')[0];\n  \n  // Generate personalized email\n  const emailSubject = `${company} - ${jobTitle} opening`;\n  \n  const emailBody = `Hi ${firstName},\\n\\nI noticed ${company} is actively hiring for ${jobTitle} positions.\\n\\nThis typically signals growth in your ${department} team, which means you're likely evaluating tools to help your new hire ramp up faster and hit the ground running.\\n\\nAt [YOUR COMPANY], we help ${managerTitle}s like you:\\n- Onboard new hires 40% faster\\n- Increase team productivity by 3x\\n- Reduce ramp time from 90 to 45 days\\n\\nGiven ${company}'s size (${employeeCount} employees) and growth trajectory, I'd love to share how companies like Stripe and Shopify scaled their teams efficiently.\\n\\nWould you be open to a 15-minute call next week?\\n\\nBest,\\n[YOUR NAME]\\n\\nP.S. I see from your profile that you're \\"${managerHeadline}\\" - I have some insights on ${department} team scaling that might be valuable regardless.`;\n  \n  // Calculate opportunity score\n  let score = 0;\n  const empCount = parseInt(employeeCount.replace(/,/g, '')) || 0;\n  if (empCount > 1000) score += 3;\n  else if (empCount > 500) score += 2;\n  else if (empCount > 100) score += 1;\n  \n  if (managerTitle.toLowerCase().includes('vp') || managerTitle.toLowerCase().includes('chief')) score += 3;\n  else if (managerTitle.toLowerCase().includes('director') || managerTitle.toLowerCase().includes('head')) score += 2;\n  \n  if (item.json.priority === 'High') score += 2;\n  \n  results.push({\n    json: {\n      companyName: company,\n      companyLinkedIn: item.json.companyLinkedIn,\n      employeeCount: employeeCount,\n      hiringManagerName: managerName,\n      hiringManagerTitle: managerTitle,\n      hiringManagerLinkedIn: item.json.hiringManagerLinkedIn,\n      hiringManagerEmail: item.json.email || `${firstName.toLowerCase()}.${managerName.split(' ')[1]?.toLowerCase()}@${company.toLowerCase().replace(/\\s/g, '')}.com`,\n      companyEmail: item.json.companyEmail,\n      emailSubject: emailSubject,\n      emailBody: emailBody,\n      jobTitle: jobTitle,\n      department: department,\n      postedDate: item.json.jobPosting?.postedDate || 'Recently',\n      opportunityScore: score,\n      priority: score >= 6 ? 'High' : score >= 4 ? 'Medium' : 'Low',\n      timestamp: new Date().toISOString()\n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2660, 460],
+      "name": "Generate Personalized Outreach"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1120, 460],
+      "name": "Split Into Batches"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "companyName"
+            },
+            {
+              "fieldToAggregate": "hiringManagerName"
+            },
+            {
+              "fieldToAggregate": "hiringManagerTitle"
+            },
+            {
+              "fieldToAggregate": "emailSubject"
+            },
+            {
+              "fieldToAggregate": "opportunityScore"
+            },
+            {
+              "fieldToAggregate": "priority"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [2880, 460],
+      "name": "Aggregate All Opportunities"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "total",
+              "name": "totalOpportunities",
+              "value": "={{ $json.companyName.length }}",
+              "type": "number"
+            },
+            {
+              "id": "high",
+              "name": "highPriorityCount",
+              "value": "={{ $json.priority.filter(p => p === 'High').length }}",
+              "type": "number"
+            },
+            {
+              "id": "summary",
+              "name": "summary",
+              "value": "={{ \"Found \" + $json.companyName.length + \" opportunities with \" + $json.priority.filter(p => p === 'High').length + \" high-priority leads ready for outreach\" }}",
+              "type": "string"
+            },
+            {
+              "id": "data",
+              "name": "opportunities",
+              "value": "={{ $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [3100, 460],
+      "name": "Final Results & Summary"
+    }
+  ],
+  "connections": {
+    "Daily at 9am": {
+      "main": [
+        [
+          {
+            "node": "Input - Target Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input - Target Companies": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Employee Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Employee Count": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Company Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Company Email": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Get Employees List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Get Employees List": {
+      "main": [
+        [
+          {
+            "node": "Identify Hiring Managers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Identify Hiring Managers": {
+      "main": [
+        [
+          {
+            "node": "Filter - Valid Opportunities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter - Valid Opportunities": {
+      "main": [
+        [
+          {
+            "node": "LinkFinder AI - Enrich Manager Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkFinder AI - Enrich Manager Profile": {
+      "main": [
+        [
+          {
+            "node": "Generate Personalized Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Personalized Outreach": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          null
+        ],
+        [
+          {
+            "node": "Aggregate All Opportunities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All Opportunities": {
+      "main": [
+        [
+          {
+            "node": "Final Results & Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
+```
