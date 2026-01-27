@@ -1,0 +1,482 @@
+{
+  "name": "Backlink linkfinder AI",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function extractDomain(url) {\n    // Remove protocol and clean\n    let domain = url.replace(/^https?:\\/\\//, '').replace(/\\s+/g, '').split('/')[0];\n    \n    // Remove www. prefix if present\n    domain = domain.replace(/^www\\./, '');\n    \n    // Split by dots\n    let parts = domain.split('.');\n    \n    // List of common multi-part TLDs\n    const multiPartTLDs = ['com.au', 'co.uk', 'com.br', 'co.in', 'co.za', 'com.mx', 'co.nz'];\n    \n    // Check if domain ends with a multi-part TLD\n    if (parts.length >= 3) {\n        const lastTwoParts = parts.slice(-2).join('.');\n        if (multiPartTLDs.includes(lastTwoParts)) {\n            // Take last 3 parts (domain + multi-part TLD)\n            return parts.slice(-3).join('.');\n        }\n    }\n    \n    // For regular TLDs, take last 2 parts\n    if (parts.length >= 2) {\n        return parts.slice(-2).join('.');\n    }\n    \n    // Return as is if only one part\n    return domain;\n}\n\nconst domain = $json.url;\nreturn {\n        extractedDomain: extractDomain(domain),\n        originalDomain: domain\n    }\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1360,
+        -32
+      ],
+      "id": "c934f53c-9b34-4eed-b7a7-078a324afd94",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function extractEmails(text) {\n    // Patterns pour différents formats d'emails\n    const emailPatterns = [\n        // Standard email format (most comprehensive)\n        /\\b[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?@[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?\\.[A-Za-z]{2,}\\b/g,\n        \n        // More permissive for edge cases\n        /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g,\n        \n        // International domains with longer TLDs\n        /\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}\\b/g\n    ];\n    \n    let allMatches = [];\n    \n    emailPatterns.forEach(pattern => {\n        const matches = text.match(pattern);\n        if (matches) {\n            allMatches = allMatches.concat(matches);\n        }\n    });\n    \n    // Clean and validate matches\n    const cleanedEmails = allMatches\n        .map(email => email.toLowerCase().trim())\n        .filter(email => {\n            return email.includes('@') && \n                   email.includes('.') &&\n                   email.split('@').length === 2 &&\n                   !email.startsWith('.') &&\n                   !email.endsWith('.') &&\n                   !email.includes('..') &&\n                   !email.match(/^[.@]/) &&\n                   !email.match(/[.@]$/) &&\n                   !email.includes('@.') &&\n                   !email.includes('.@') &&\n                   email.length <= 254 &&\n                   email.split('@')[0].length <= 64 &&\n                   email.split('@')[1].length <= 253;\n        })\n        .filter(email => {\n            const domain = email.split('@')[1];\n            return !domain.match(/^\\d+$/) &&\n                   !email.includes('example.com') &&\n                   !email.includes('test.com') &&\n                   !email.includes('domain.com');\n        });\n    \n    // Remove duplicates\n    const uniqueEmails = [...new Set(cleanedEmails)];\n    \n    // Priority: Common domains first, then by length\n    return uniqueEmails.sort((a, b) => {\n        const commonDomains = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com'];\n        const aDomain = a.split('@')[1];\n        const bDomain = b.split('@')[1];\n        \n        const aIsCommon = commonDomains.includes(aDomain);\n        const bIsCommon = commonDomains.includes(bDomain);\n        \n        if (aIsCommon && !bIsCommon) return -1;\n        if (!aIsCommon && bIsCommon) return 1;\n        \n        return a.length - b.length;\n    });\n}\n\n// Since result is just a string, extract emails directly from it\nconst resultText = String($json.result || '');\nconst extractedEmails = extractEmails(resultText);\n\nreturn {\n    emails: extractedEmails,\n    primaryEmail: extractedEmails[0] || null,\n    totalFound: extractedEmails.length\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2656,
+        336
+      ],
+      "id": "6cd3e7a8-c26b-4672-93d5-62eb866ec884",
+      "name": "Code5",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9093df32-510f-485e-8c2d-d802277bb9f5",
+              "leftValue": "={{ $json.primaryEmail }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2240,
+        336
+      ],
+      "id": "2575023a-b557-4edf-a7e8-fe5093509955",
+      "name": "If",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.instantly.ai/api/v2/leads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer INSTANTLY_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"email\": \"{{ $json.email }}\",\n\"personalization\":\"{{ $('Split Out').first().json.title }}\",\n\"website\":\"{{ $('Code').first().json.originalDomain }}\",\n\"companyName\":\"{{ $('Code').first().json.extractedDomain.split('.')[0] }}\",\n  \"campaign\": \"ADD_CAMPAIGN_ID\"\n} ",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchInterval": 5000
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        304
+      ],
+      "id": "edd057bb-a58c-440a-8622-85c28f2424a7",
+      "name": "HTTP Request",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1ytnEv_PbAATKmkHPwH-aMRzUmDyNwsZbnpP0ik0Kw8w",
+          "mode": "list",
+          "cachedResultName": "outbound backlink linkfinder ai",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytnEv_PbAATKmkHPwH-aMRzUmDyNwsZbnpP0ik0Kw8w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ytnEv_PbAATKmkHPwH-aMRzUmDyNwsZbnpP0ik0Kw8w/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2752,
+        -32
+      ],
+      "id": "310c80b2-298d-457d-8f7c-34cbba3db4c6",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "mi5z7FRamyMvmQoQ",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/scraperlink~google-search-results-serp-scraper/run-sync-get-dataset-items?token=APIFY_API_KEY",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"keyword\": \"{{ $json['vs bright data'].trim() }}\",\n  \"limit\": \"30\",\n    \"page\": 1,\n    \"start\": 1\n} ",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 25,
+              "batchInterval": 5000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2032,
+        -32
+      ],
+      "id": "8da3c55a-4da1-410c-aaad-8e39dcb18a03",
+      "name": "HTTP Request36",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api.linkfinderai.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer API_KEY_LINKFINDERAI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "company_name_to_email"
+            },
+            {
+              "name": "input_data",
+              "value": "={{ $json.extractedDomain }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 25,
+              "batchInterval": 5000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        -32
+      ],
+      "id": "cb303143-c66c-47b2-b2d3-64312b16e900",
+      "name": "HTTP Request37",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        -32
+      ],
+      "id": "9a8fca7d-9c92-420d-a72d-e9a245e0cfe3",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/account56~email-verifier/run-sync-get-dataset-items?token=APIFY_API_KEY",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"emails\": {{ JSON.stringify($json.emails) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1536,
+        320
+      ],
+      "id": "a38f3473-7d6e-4875-84a1-ae4a68acc299",
+      "name": "HTTP Request1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c3a2ebf0-ddb1-4e5a-9e37-24c4e27c3b8b",
+              "leftValue": "={{ $json.subresult }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1296,
+        320
+      ],
+      "id": "2b53cba4-b100-4fe7-bf42-312f490faf0c",
+      "name": "If1",
+      "executeOnce": false,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const emails = items.map(item => item.json.primaryEmail);\n\nreturn [{\n  json: {\n    emails: emails\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1856,
+        320
+      ],
+      "id": "1e3c7122-9333-4d55-9798-868f420f2f94",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "batchSize": 15,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2432,
+        -32
+      ],
+      "id": "36c7b5a8-3422-48c4-83b9-eb511d52b709",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "content": "# 🔗 Backlink Linkfinder AI - Outbound Link Prospecting\n\n**What it does:** Searches Google for websites ranking on specific keywords, extracts and verifies contact emails from those domains, then automatically adds qualified prospects to your email outreach campaign for backlink opportunities.\n\n**Input:** Google Sheet with search keywords (one per row in \"vs bright data\" column)\n\n**Output:** Verified contacts automatically added to Instantly.ai campaign with personalization data\n\n**Scalability:** Processes unlimited keywords in batches of 15, with up to 30 websites per keyword\n\n**Setup:**\n1. Get API key from https://linkfinderai.com\n2. Get API key from https://apify.com\n3. Get API key from https://instantly.ai\n4. Replace API keys in the workflow:\n   - LinkFinder AI key in HTTP Request37 node (Bearer token)\n   - Apify token in HTTP Request36 and HTTP Request1 nodes\n   - Instantly.ai key in HTTP Request node\n5. Connect your Google Sheet (or use the template: `1ytnEv_PbAATKmkHPwH-aMRzUmDyNwsZbnpP0ik0Kw8w`)\n6. Update the Instantly.ai campaign ID in HTTP Request node\n7. Test with a few keywords first\n\n**Services used:**\n- **Apify:** Google SERP scraping, email verification\n- **LinkFinder AI:** company_name_to_email\n- **Instantly.ai:** Campaign management and lead upload\n- **Google Sheets:** Input management and tracking\n\n**Perfect for:**\n- SEO agencies doing outbound link building\n- Content marketers seeking guest posting opportunities\n- Digital PR teams building backlink campaigns\n- Link builders prospecting at scale\n- Outreach specialists automating list building\n\n**Key Features:**\n- Multi-format email extraction and validation\n- Automatic domain cleaning (handles all TLD formats)\n- Email deliverability verification before outreach\n- Intelligent batching to respect API rate limits\n- Personalization data included (title, website, company name)\n- Error handling to ensure workflow continuity",
+        "height": 580,
+        "width": 380,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3296,
+        -128
+      ],
+      "name": "📖 Documentation",
+      "id": "663110eb-ad96-4b9a-b95b-e06e42f87aac"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request37",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code5": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request36": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request37": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request36",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "availableInMCP": false
+  },
+  "versionId": "8d835fdd-8204-4cae-959c-3bf95f941473",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0ba15c473753d92c71f15fc9391d54bb141d91f940c0582da38b60426c3c2f10"
+  },
+  "id": "KCJfbtDHeyz92opu",
+  "tags": []
+}
